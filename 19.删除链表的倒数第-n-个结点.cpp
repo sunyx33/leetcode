@@ -13,16 +13,6 @@ struct ListNode {
     ListNode(int x, ListNode *next) : val(x), next(next) {}
 };
 // @lc code=start
-/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode() : val(0), next(nullptr) {}
- *     ListNode(int x) : val(x), next(nullptr) {}
- *     ListNode(int x, ListNode *next) : val(x), next(next) {}
- * };
- */
 class Solution {
 public:
     ListNode* removeNthFromEnd(ListNode* head, int n) {
@@ -41,12 +31,8 @@ public:
             fast = fast->next;
             slow = slow->next;
         }
-        slow->next = slow->next->next; 
-        
-        // ListNode *tmp = slow->next;  C++释放内存的逻辑
-        // slow->next = tmp->next;
-        // delete nth;
-        
+        slow->next = slow->next->next;     
+            
         return dummyHead->next;
     }
 };
