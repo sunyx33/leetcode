@@ -1,11 +1,10 @@
 /*
- * @lc app=leetcode.cn id=102 lang=cpp
+ * @lc app=leetcode.cn id=226 lang=cpp
  *
- * [102] 二叉树的层序遍历
+ * [226] 翻转二叉树
  */
+
 #include <queue>
-#include <vector>
-#include <iostream>
 
 using namespace std;
 
@@ -17,6 +16,7 @@ struct TreeNode {
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
 };
+
 // @lc code=start
 /**
  * Definition for a binary tree node.
@@ -31,26 +31,27 @@ struct TreeNode {
  */
 class Solution {
 public:
-    vector<vector<int>> levelOrder(TreeNode* root) {
+    TreeNode* invertTree(TreeNode* root) {
         queue<TreeNode*> que;
-        if (root != NULL) que.push(root);
-        vector<vector<int>> result;
-        while (!que.empty()) {
-            int size = que.size();
-            vector<int> vec;
-            // 这里一定要使用固定大小size，不要使用que.size()，因为que.size是不断变化的
-            for (int i = 0; i < size; i++) {
-                TreeNode* node = que.front();
-                que.pop();
-                vec.push_back(node->val);
-                if (node->left) que.push(node->left);
-                if (node->right) que.push(node->right);
-            }
-            result.push_back(vec);
+        if(root != nullptr){
+            que.push(root);
         }
-        return result;
+        
+        while(!que.empty()) {
+            TreeNode* cur = que.front();
+            TreeNode* temp = cur->left;
+            cur->left = cur->right;
+            cur->right = temp;
+            que.pop();
+            if (cur->left != nullptr) {
+                que.push(cur->left);
+            }
+            if (cur->right != nullptr) {
+                que.push(cur->right);
+            }
+        }
+        return root;
     }
 };
 // @lc code=end
-
 
