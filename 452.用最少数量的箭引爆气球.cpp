@@ -18,7 +18,7 @@ public:
 
         int result = 1; // points 不为空至少需要一支箭
         for (int i = 1; i < points.size(); i++) {
-            if (points[i][0] > points[i - 1][1]) {  // 气球i和气球i-1不挨着，注意这里不是>=
+            if (points[i][0] > points[i - 1][1]) {  // 气球i和气球i-1不重叠，注意这里不是>=
                 result ++; // 需要一支箭
             }
             else { // i 与 i - 1 重叠
