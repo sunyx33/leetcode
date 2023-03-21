@@ -6948,6 +6948,167 @@ public:
 
 
 
+## 392. 判断子序列 [medium]
+
+[392. 判断子序列 - 力扣（LeetCode）](https://leetcode.cn/problems/is-subsequence/)
+
+**思路：**
+
+正常思路：
+
+双指针，i是s的指针，j是t的指针。匹配上了俩都++，没匹配上j++。最后i到头了就true，没到头就false
+
+动规：
+
+1. dp数组以及下标的含义
+
+   dp\[i][j]：以s[i - 1]结尾的字符串与t[j - 1]结尾的字符串，**相同子序列的长度为dp\[i][j]**
+
+2. 确定递推公式
+
+   ```
+   if (s[i - 1] == t[j - 1]) dp[i][j] = dp[i - 1][j - 1] ++;
+   else dp[i][j] = dp[i][j - 1];
+   ```
+
+   很像[1143.最长公共子序列 [medium]](#1143.最长公共子序列 [medium])，但本题只有t中可以删字符，所以还是有些差别
+
+3. dp数组如何初始化
+
+   ```
+   dp[0][j] = 0;
+   ```
+
+4. 确定遍历顺序
+
+   从左到右
+
+5. 举例推导dp数组
+
+   ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/2021030317364166.jpg)
+
+
+
+**代码：**
+
+双指针：
+
+```c++
+class Solution {
+public:
+    bool isSubsequence(string s, string t) {
+        int i = 0;
+        int j = 0;
+        while (i < s.size() & j < t.size()){
+            if (s[i] == t[j]) {
+                i ++;
+                j ++;
+            } else {
+                j ++;
+            }
+        }
+        if (i == s.size()) return true;
+        else return false;
+    }
+};
+```
+
+动规：
+
+```c++
+class Solution {
+public:
+    bool isSubsequence(string s, string t) {
+        vector<vector<int>> dp(s.size() + 1, vector<int>(t.size() + 1, 0));
+        for (int i = 1; i <= s.size(); i++) {
+            for (int j = 1; j <= t.size(); j++) {
+                if (s[i - 1] == t[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
+                else dp[i][j] = dp[i][j - 1];
+            }
+        }
+        return dp[s.size()][t.size()] == s.size();
+    }
+};
+```
+
+
+
+## 115. 不同的子序列 [hard]
+
+[115. 不同的子序列 - 力扣（LeetCode）](https://leetcode.cn/problems/distinct-subsequences/)
+
+**思路：**
+
+1. 确定dp数组（dp table）以及下标的含义
+
+   dp\[i][j]：以i-1为结尾的s子序列中出现以j-1为结尾的t的个数为dp\[i][j]。
+
+2. 确定递推公式
+
+   这一类问题，基本是要分析两种情况
+
+   - s[i - 1] 与 t[j - 1]相等
+
+     如果用s[i - 1]来匹配，个数为dp\[i - 1][j - 1]，即不需要考虑当前s子串和t子串的最后一位字母，所以只需要 dp\[i-1][j-1]。
+
+     如果不用s[i - 1]来匹配，个数为dp\[i - 1][j]，即不考虑s子串最后一个字母。
+
+     t子串不能删除，所以有上面两种情况，两种情况加起来：dp\[i][j] = dp\[i - 1][j - 1] + dp\[i - 1][j]
+
+   - s[i - 1] 与 t[j - 1] 不相等
+
+     那就就和去掉当前s位的情况一样咯，即dp\[i][j] = dp\[i - 1][j];
+
+3. dp数组如何初始化
+
+   由于是从左方与上方初始化，所以dp\[i][0] 和dp\[0][j]是一定要初始化的。
+
+   dp\[i][0] 表示：以i-1为结尾的s可以随便删除元素，出现空字符串的个数。所以 = 1
+
+   dp\[0][j]：空字符串s可以随便删除元素，出现以j-1为结尾的字符串t的个数。所以 = 0
+
+   dp\[0][0]应该是1，空字符串当然包括一个空字符串。（你要不要听听你在说什么？）
+
+4. 确定遍历顺序
+
+   从左到右，从上到下
+
+5. 举例推导dp数组
+
+   ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/115.不同的子序列.jpg)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        vector<vector<uint64_t>> dp(s.size() + 1, vector<uint64_t>(t.size() + 1));
+        for(int i = 0; i <= s.size(); i++) {
+            dp[i][0] = 1;
+        }
+
+        for (int i = 1; i <= s.size(); i++) {
+            for (int j = 1; j <= t.size(); j++) {
+                if(s[i - 1] == t[j - 1]) dp[i][j] = dp[i - 1][j] + dp[i - 1][j - 1];
+                else dp[i][j] = dp[i - 1][j];
+            }
+        }
+        return dp[s.size()][t.size()];
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
 # 其他
 
 ## 13. 罗马数字转整数 [easy]
