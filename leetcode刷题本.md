@@ -4460,6 +4460,8 @@ public:
 
 **思路：**
 
+贪心：
+
 ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/53.最大子序和.gif)
 
 从第一个数字开始向后累加，当累加结果<0时，下一个元素从零开始加。这就是贪心算法的思路。
@@ -4470,7 +4472,35 @@ public:
 
 result初始化为int32的最小值，之后遇到比result大的sum，就更新result。这样就算是数组只有一个元素也可以正确输出该元素。
 
+动规：
+
+1. dp数组以及下标的含义
+
+   dp[i]：以nums[i]结尾的最大子序和为dp[i]（注意：凡是题目涉及到连续，动规时就该考虑以第i位结尾，而不是[0, i]中有）
+
+2. 确定递推公式
+
+   就看dp[i - 1]加不加nums[i]，不加的话，就从nums[i]重新开始
+
+   dp[i] = max(dp[i - 1] + nums[i], nums[i])。
+
+   其实相当于如果dp[i - 1]都是负数了，那就丢掉从新开始咯
+
+3. dp数组如何初始化
+
+   dp[0] = nums[0]
+
+4. 确定遍历顺序
+
+   从左到右
+
+5. 举例推导dp数组
+
+   ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/20210303104129101.png)
+
 **代码：**
+
+贪心：
 
 ```c++
 class Solution {
@@ -4484,6 +4514,25 @@ public:
                 result = count;
             }
             if (count <= 0) count = 0;
+        }
+        return result;
+    }
+};
+```
+
+动规：
+
+```c++
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        if (nums.size() == 0) return 0;
+        vector<int> dp(nums.size());
+        dp[0] = nums[0];
+        int result = dp[0];
+        for (int i = 1; i < nums.size(); i++) {
+            dp[i] = max(dp[i - 1] + nums[i], nums[i]); // 状态转移公式
+            if (dp[i] > result) result = dp[i]; // result 保存dp[i]的最大值
         }
         return result;
     }
@@ -6862,6 +6911,40 @@ public:
     }
 };
 ```
+
+
+
+## 1035.不相交的线 [medium]
+
+[1035. 不相交的线 - 力扣（LeetCode）](https://leetcode.cn/problems/uncrossed-lines/description/)
+
+**思路：**
+
+和上道题一样。
+
+对了，上道题result多此一举，看下面：
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int maxUncrossedLines(vector<int>& nums1, vector<int>& nums2) {
+        vector<vector<int>> dp(nums1.size() + 1, vector<int>(nums2.size() + 1, 0));
+        for (int i = 1; i <= nums1.size(); i++) {
+            for (int j = 1; j <= nums2.size(); j++) {
+                if(nums1[i - 1] == nums2[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
+                else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            }            
+        }
+        return dp[nums1.size()][nums2.size()];
+    }
+};
+```
+
+
+
+##  [53. 最大子序和 [medium]](#53. 最大子序和 [medium])
 
 
 
