@@ -7101,6 +7101,309 @@ public:
 
 
 
+## 583. 两个字符串的删除操作 [medium]
+
+[583. 两个字符串的删除操作 - 力扣（LeetCode）](https://leetcode.cn/problems/delete-operation-for-two-strings/)
+
+**思路：**
+
+本质是求两个字符串的最长公共子序列，和[1143题](#1143.最长公共子序列 [medium])几乎一样，最后的返回值有些差别，毕竟本题求得是最少删除数。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        vector<vector<int>> dp(word1.size() + 1, vector<int>(word2.size() + 1));
+        for (int i = 1; i <= word1.size(); i++) {
+            for (int j = 1; j <= word2.size(); j++) {
+                if(word1[i -1] == word2[j - 1]) dp[i][j] = dp[i-1][j-1] + 1;
+                else dp[i][j] = max(dp[i][j - 1], dp[i - 1][j]);
+            }
+        }
+        return word1.size() + word2.size() - 2 * dp[word1.size()][word2.size()];
+    }
+};
+```
+
+
+
+## 72. 编辑距离 [hard]
+
+[72. 编辑距离 - 力扣（LeetCode）](https://leetcode.cn/problems/edit-distance/)
+
+**思路：**
+
+1. dp数组以及下标的含义
+
+   **dp\[i][j] 表示以下标i-1为结尾的字符串word1，和以下标j-1为结尾的字符串word2，最近编辑距离为dp\[i][j]**。
+
+2. 确定递推公式
+
+   如果word1[i - 1] == word2[j - 1]，则不用任何编辑。此时dp\[i][j] = dp\[i - 1][j - 1]
+
+   如果word1[i - 1] != word2[j - 1]，则需要编辑，编辑分为删，改，增三种：
+
+   - 删
+
+     word1删除一个元素，那么就是以下标i - 2为结尾的word1 与 j-1为结尾的word2的最近编辑距离再加上一个操作。
+
+     ```c++
+     dp[i][j] = dp[i - 1][j] + 1;
+     ```
+
+     word2删除一个元素，那么就是以下标i - 1为结尾的word1 与 j-2为结尾的word2的最近编辑距离再加上一个操作。
+
+     ```c++
+     dp[i][j] = dp[i][j - 1] + 1;
+     ```
+
+   - 增：
+
+     其实word1删除word1[i - 1]，就相当于word2加上这个元素。所以增包含在删里了。
+
+   - 改：
+
+     `word1`替换`word1[i - 1]`，使其与`word2[j - 1]`相同，此时不用增删加元素。
+
+     由于替换后word1[i - 1] == word2[j - 1]，所以有：dp\[i][j] = dp\[i - 1][j - 1] + 1;
+
+   综上：
+
+   ```c++
+   if (word1[i - 1] == word2[j - 1]) {
+       dp[i][j] = dp[i - 1][j - 1];
+   }
+   else {
+       dp[i][j] = min({dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]}) + 1;
+   }
+   ```
+
+3. dp数组如何初始化
+
+   dp\[i][0] ：以下标i-1为结尾的字符串word1，和空字符串word2，最近编辑距离为dp\[i][0]。那么显然dp\[i][0] = i
+
+   同理，dp\[0][j] = j
+
+4. 确定遍历顺序
+
+   从左到右，从上到下
+
+5. 举例推导dp数组
+
+   ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/20210114162132300.jpg)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        vector<vector<int>> dp(word1.size() + 1, vector<int>(word2.size() + 1, 0));
+        for (int i = 0; i <= word1.size(); i++) dp[i][0] = i;
+        for (int j = 0; j <= word2.size(); j++) dp[0][j] = j;
+        for (int i = 1; i <= word1.size(); i++) {
+            for (int j = 1; j <= word2.size(); j++) {
+                if (word1[i - 1] == word2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                }
+                else {
+                    dp[i][j] = min({dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]}) + 1;
+                }
+            }
+        }
+        return dp[word1.size()][word2.size()];
+    }
+};
+```
+
+
+
+## 647. 回文子串 [medium]
+
+[647. 回文子串 - 力扣（LeetCode）](https://leetcode.cn/problems/palindromic-substrings/)
+
+**思路：**
+
+双指针法：
+
+如何判断一个字符串是回文串？答曰：从中间向两边两个指针，各自向左向右走，那么当这两个指针指的字符不为空且相等，就可以说找到了一个回文串。
+
+字符串中每一个字符都可以当作”中间“，当然，每相邻得两个字符也可以当作”中间“。
+
+动规：
+
+1. dp数组以及下标的含义
+
+   dp\[i][j]：表示区间范围[i,j] （注意是左闭右闭）的子串是否是回文子串，如果是dp\[i][j]为true，否则为false。
+
+2. 确定递推公式
+
+   当s[i] != s[j]时，没啥好说了，一定是false
+
+   当s[i] == s[j]时，就比较复杂了：
+
+   - i == j：子串就一个字符，当然true
+   - i和j差1，那两个一样的字符，一眼true
+   - 以上之外呢，就要与前辈dp\[i + 1][j - 1]一样，也就是先保证里层是回文。
+
+   综上：
+
+   ```c++
+   if (s[i] == s[j]) {
+       if (j - i <= 1) { // 情况一 和 情况二
+           result++;
+           dp[i][j] = true;
+       } else if (dp[i + 1][j - 1]) { // 情况三
+           result++;
+           dp[i][j] = true;
+       }
+   }
+   ```
+
+3. dp数组如何初始化
+
+   dp\[i][j]可以初始化为true么？ 当然不行，怎能刚开始就全都匹配上了。
+
+   所以dp\[i][j]初始化为false。
+
+4. 确定遍历顺序
+
+   观察上面的递推公式，发现出现了dp\[i + 1][j - 1]，这玩意在左下角。
+
+   所以应当从左到右，从下到上。也就是i从大到小，j从小到大。
+
+5. 举例推导dp数组
+
+   ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/20210121171059951-20230310132153163.jpg)
+
+**代码：**
+
+双指针法：
+
+```c++
+class Solution {
+public:
+    int countSubstrings(string s) {
+        int result = 0;
+        for (int i = 0; i < s.size(); i++) {
+            result += extend(s, i, i, s.size()); // 以i为中心
+            result += extend(s, i, i + 1, s.size()); // 以i和i+1为中心
+        }
+        return result;
+    }
+    int extend(const string& s, int i, int j, int n) {
+        int res = 0;
+        while (i >= 0 && j < n && s[i] == s[j]) {
+            i--;
+            j++;
+            res++;
+        }
+        return res;
+    }
+};
+```
+
+动规：
+
+```c++
+class Solution {
+public:
+    int countSubstrings(string s) {
+        vector<vector<bool>> dp(s.size(), vector<bool>(s.size(), false));
+        int result = 0;
+        for (int i = s.size() - 1; i >= 0; i--) {  // 注意遍历顺序
+            for (int j = i; j < s.size(); j++) {
+                if (s[i] == s[j]) {
+                    if (j - i <= 1) { // 情况一 和 情况二
+                        result++;
+                        dp[i][j] = true;
+                    } else if (dp[i + 1][j - 1]) { // 情况三
+                        result++;
+                        dp[i][j] = true;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+};
+```
+
+
+
+## 516. 最长回文子序列 [medium]
+
+[516. 最长回文子序列 - 力扣（LeetCode）](https://leetcode.cn/problems/longest-palindromic-subsequence/)
+
+**思路：**
+
+1. dp数组以及下标的含义
+
+   dp\[i][j]：子串[i, j]中最长回文序列的长度
+
+2. 确定递推公式
+
+   s[i] == s[j]：dp\[i][j] = dp\[i + 1][j - 1] + 2;
+
+   s[i] != s[j]：这时显然，同时加入s[i]与s[j]对于回文序列的长度没有贡献。加一个或许还有贡献（bbba），所以取两边只加一个的最大值
+
+   dp\[i][j] = max(dp\[i + 1][j], dp\[i][j - 1])
+
+3. dp数组如何初始化
+
+   可以看到，dp数组计算不到i == j时的情况。故需初始化。
+
+   显然，当i与j相等，那就是取一个字符，本身就是回文序列。=1
+
+4. 确定遍历顺序
+
+   从下向上，从左往右，同时确保i < j（i > j赋值0即可。）
+
+5. 举例推导dp数组
+
+   ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/20210127151521432.jpg)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int longestPalindromeSubseq(string s) {
+        vector<vector<int>> dp(s.size(), vector<int>(s.size()));
+        for(int i = 0; i < s.size(); i++) {
+            dp[i][i] = 1;
+        }
+        for (int i = s.size() - 1; i >= 0; i--) {
+            for (int j = 0; j < s.size(); j++) {
+                if(j > i) {
+                    if(s[i] == s[j]) dp[i][j] = dp[i + 1][j - 1] + 2;
+                    else dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[0][s.size() - 1];
+    }
+};
+```
+
+
+
+## 动规总结
+
+终于做完一遍啦，感觉有些题还是迷迷糊糊。需要二刷。
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230322202558390.png)
+
+<img src="https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230322202648617.png" style="zoom: 200%;" />
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230322202729557.png)
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230322202807980.png)
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230322202857050.png)
+
 
 
 
@@ -7350,3 +7653,6 @@ class Solution {
     }
 }
 ```
+
+
+
