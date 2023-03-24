@@ -7406,9 +7406,260 @@ public:
 
 
 
+# 单调栈
+
+单调栈即从栈头到栈尾元素单调递增或递减的栈。
+
+什么时候想到用单调栈？**通常是一维数组，要寻找任一个元素的右边或者左边第一个比自己大或者小的元素的位置，此时我们就要想到可以用单调栈了**。
+
+## 739. 每日温度 [medium]
+
+[739. 每日温度 - 力扣（LeetCode）](https://leetcode.cn/problems/daily-temperatures/)
+
+**思路：** 
+
+用一个单调递增栈来记录遍历过的数组。明确：单调递增栈是下面的元素 >= 上面的元素。如果新入栈的元素大于当前栈顶元素，就将栈顶逐一pop出直到新入栈的元素 <= 栈顶元素即可。
+
+本题是要求右边第一个比它大的元素，故用单调递增栈。这样一来，当栈顶a元素被b元素挤出来，那么就可以说b就是右边第一个比a大的元素。那如果用下标代替元素本身入栈，那res[index(a)] = index(b) - index(a)。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> dailyTemperatures(vector<int>& temperatures) {
+        stack<int> st;
+        vector<int> result(temperatures.size(), 0);
+        st.push(0);
+        for (int i = 1; i < temperatures.size(); i++) {
+            if(temperatures[i] <= temperatures[st.top()]) st.push(i);
+            else {
+                while (!st.empty() && temperatures[i] > temperatures[st.top()]) {
+                    result[st.top()] = i - st.top();
+                    st.pop();
+                }
+                st.push(i);
+            }    
+        }
+        return result;
+    }
+};
+```
 
 
 
+## 496. 下一个更大元素 I [easy]
+
+[496. 下一个更大元素 I - 力扣（LeetCode）](https://leetcode.cn/problems/next-greater-element-i/)
+
+**思路：**
+
+查找下一个更大元素的方法和上题一样，区别在于需要确定被挤掉的元素在nums[1]中的位置。这里我没采用map来实现：键为元素，值为下标
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> nextGreaterElement(vector<int>& nums1, vector<int>& nums2) {
+        unordered_map<int, int> umap;
+        for (int i = 0; i < nums1.size(); i++) {
+            umap[nums1[i]] = i;
+        }
+
+        vector<int> result(nums1.size(), -1);
+        stack<int> sta;
+        sta.push(nums2[0]);
+        for (int i = 1; i < nums2.size(); i++) {
+            if (nums2[i] <= sta.top()) sta.push(nums2[i]);
+            else {
+                while (!sta.empty() && nums2[i] > sta.top()) {
+                    if (umap.count(sta.top()) > 0) { // 查看nums1里有没有这个元素
+                        result[umap[sta.top()]] = nums2[i];
+                    }
+                    sta.pop();
+                }
+                sta.push(nums2[i]);
+            }
+        }
+        return result;
+    }
+};
+```
+
+
+
+##  503. 下一个更大元素II [medium]
+
+[503. 下一个更大元素 II - 力扣（LeetCode）](https://leetcode.cn/problems/next-greater-element-ii/)
+
+**思路：**
+
+环形数组，可以在数组后面续上相同的一份，以此来模拟环形队列（最多也就是找两圈嘛）。基本思路和上两题没差。
+
+但其实也不用真的续上一节，只需在遍历时取模就行，详见代码。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> nextGreaterElements(vector<int>& nums) {
+        vector<int> result(nums.size(), -1);
+        stack<int> st;
+        for (int i = 0; i < nums.size() * 2; i++) {
+            // 模拟遍历两边nums，注意一下都是用i % nums.size()来操作
+            while (!st.empty() && nums[i % nums.size()] > nums[st.top()]) {
+                result[st.top()] = nums[i % nums.size()];
+                st.pop();
+            }
+            st.push(i % nums.size());
+        }
+        return result;
+    }
+};
+```
+
+
+
+## 42. 接雨水 [hard]
+
+[42. 接雨水 - 力扣（LeetCode）](https://leetcode.cn/problems/trapping-rain-water/)
+
+**思路：**
+
+单调栈：
+
+当一个柱子左右两边均有比他高的柱子时，我们就可以说这里是一个槽，假设左边第一个比他高的柱子下标为i，右边第一个比他高的柱子下标为j，那这个槽的高度为min(height[i], height[j]) - height[自己]，宽度为i - j - 1。
+
+明白上面的原理就好办了：单调栈，如果栈高大于1的话，说明下面那个元素就是上面元素的左边最近的高于他的元素，而新入栈将要挤掉它的，就是右边最近的高于他的元素。
+
+如果新入栈的元素和栈顶元素同样大，就要先pop再push，因为我们要求宽度的时候 如果遇到相同高度的柱子，需要使用最右边的柱子来计算宽度。
+
+双指针 + 动规：
+
+经过上面的分析我们知道，这道题核心的点在于：遍历到每一个元素时，**需要知道它左边与右边离他最近的那个高于他的柱子（如果有的话）**在哪里。
+
+如果用朴素的双指针去做，就每遍历到一个元素，就向左向右去找，若有的话就用较矮的那个和它一减，得到这个柱子能盛多少水（这里只需考虑这个柱子本身）；没有的话就不能盛水。
+
+可以用动规思想优化一下：我们把每一个位置的左边最高高度记录在一个数组上（maxLeft），右边最高高度记录在一个数组上（maxRight），当前位置，左边的最高高度是前一个位置的左边最高高度和本高度的最大值，右边同理。
+
+**代码：**
+
+单调栈：
+
+```c++
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        stack<int> st;
+        int result = 0;
+        st.push(0);
+        for (int i = 1; i < height.size(); i++) {
+            if (height[i] < height[st.top()]) {
+                st.push(i);
+            } else if (height[i] == height[st.top()]){
+                st.pop();
+                st.push(i);
+            } else {
+                while (!st.empty() && height[i] > height[st.top()]) {
+                    int mid = st.top();
+                    st.pop();
+                    if(!st.empty()) {
+                        int h = min(height[i], height[st.top()]) - height[mid];
+                        int w = i - st.top() - 1;
+                        result += h * w;
+                    }
+                }
+                st.push(i);
+            }
+        }
+        return result;
+    }
+};
+```
+
+双指针：
+
+```c++
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        if (height.size() <= 2) return 0;
+        vector<int> maxLeft(height.size(), 0);
+        vector<int> maxRight(height.size(), 0);
+        int size = maxRight.size();
+
+        // 记录每个柱子左边柱子最大高度
+        maxLeft[0] = height[0];
+        for (int i = 1; i < size; i++) {
+            maxLeft[i] = max(height[i], maxLeft[i - 1]);
+        }
+        // 记录每个柱子右边柱子最大高度
+        maxRight[size - 1] = height[size - 1];
+        for (int i = size - 2; i >= 0; i--) {
+            maxRight[i] = max(height[i], maxRight[i + 1]);
+        }
+        // 求和
+        int sum = 0;
+        for (int i = 0; i < size; i++) {
+            int count = min(maxLeft[i], maxRight[i]) - height[i];
+            if (count > 0) sum += count;
+        }
+        return sum;
+    }
+};
+```
+
+
+
+## 84. 柱状图中最大的矩形 [hard]
+
+[84. 柱状图中最大的矩形 - 力扣（LeetCode）](https://leetcode.cn/problems/largest-rectangle-in-histogram/)
+
+**思路：**
+
+和上道题很像，上道题是找每个元素左右两边第一个高的，这道题是找第一个低的。然后h * w算面积。
+
+注意，最低的那个柱子，w应该是总长度，所以要该height两边补0。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        int result = 0;
+        stack<int> st;
+        heights.insert(heights.begin(), 0);
+        heights.push_back(0);
+        st.push(0);
+
+        for (int i = 1; i < heights.size(); i++) {
+            if (heights[i] > heights[st.top()]) {
+                st.push(i);
+            } else if (heights[i] == heights[st.top()]) {
+                st.pop();
+                st.push(i);
+            } else {
+                while (!st.empty() && heights[i] < heights[st.top()]) {
+                    int mid = st.top();
+                    st.pop();
+                    if(!st.empty()) {
+                        int left = st.top();
+                        int right = i;
+                        int w = right - left - 1;
+                        int h = heights[mid];
+                        result = max(result, w * h);
+                    }
+                }
+                st.push(i);
+            }
+        }
+        return result;
+    }
+};
+```
 
 
 
