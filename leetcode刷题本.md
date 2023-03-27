@@ -441,7 +441,7 @@ private:
 
 **思路：**
 
-从头节点的前一个结点开始，记录前中后三个节点，中指向前，中等于后，前等于中，后等于后+1.
+从头节点的前一个结点开始，记录前中后三个节点，中指向前，前等于中，中等于后，后等于后+1.
 
 ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/206.翻转链表.gif)
 
@@ -733,7 +733,7 @@ public:
 
 - 数组
 - set （集合）
-- map(映射)
+- map（映射）
 
 这里数组就没啥可说的了，我们来看一下set。
 
@@ -7909,3 +7909,271 @@ class Solution {
 
 # 剑指offer
 
+## 剑指 Offer 03. 数组中重复的数字
+
+[剑指 Offer 03. 数组中重复的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof/?favorite=xb9nqhhg)
+
+**思路：**
+
+思路一：
+
+哈希法，时间O(N) 空间O(N)
+
+思路二：
+
+长度为n的数组中元素大小为[0, n-1]，那既然如此，我们可以将见到的元素放到索引的位置，如果交换时，发现索引处已存在该元素，则重复 
+
+时间O(N) 空间O(1)
+
+**代码：**
+
+哈希：
+
+```c++
+class Solution {
+public:
+    int findRepeatNumber(vector<int>& nums) {
+        unordered_set<int> set;
+        for(int i = 0; i < nums.size(); i++) {
+            if(set.find(nums[i]) == set.end()) set.insert(nums[i]);
+            else return nums[i];
+        }
+        return -1;
+    }
+};
+```
+
+方法二：
+
+```c++
+int findRepeatNumber(vector<int>& nums) {
+    for(int i=0;i<nums.size();i++){
+        while(nums[i]!=i){
+            if(nums[nums[i]] == nums[i]) return nums[i];
+            int tmp = nums[i];
+            nums[i] = nums[tmp];
+            nums[tmp] = tmp;
+        }
+    }
+    return -1;
+}
+```
+
+
+
+## 剑指 Offer 04. 二维数组中的查找 [medium]
+
+[剑指 Offer 04. 二维数组中的查找 - 力扣（LeetCode）](https://leetcode.cn/problems/er-wei-shu-zu-zhong-de-cha-zhao-lcof/?favorite=xb9nqhhg)
+
+**思路：**
+
+一言以蔽之：站在矩阵右上角看，这是一颗搜索二叉树。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool findNumberIn2DArray(vector<vector<int>>& matrix, int target) {
+        if(matrix.size() == 0 || matrix[0].size() == 0) return false;
+        int row = 0;
+        int col = matrix[0].size() - 1;
+        while(row < matrix.size() && col >= 0) {
+            if(matrix[row][col] > target) col --;
+            else if (matrix[row][col] < target) row ++;
+            else return true;
+        }   
+        return false;
+    }
+};
+```
+
+
+
+## [剑指 Offer 05. 替换空格 [easy]](#剑指Offer | 05. 替换空格 [easy])
+
+
+
+## 剑指 Offer 06. 从尾到头打印链表 [easy]
+
+[剑指 Offer 06. 从尾到头打印链表 - 力扣（LeetCode）](https://leetcode.cn/problems/cong-wei-dao-tou-da-yin-lian-biao-lcof/)
+
+**思路：**
+
+看了三种方法
+
+方法一：遍历链表，数值先存在栈中，再由栈导入数组，时间复杂度O(2n), 空间复杂度O(2n)
+
+方法二：遍历链表，获取链表长度，预先声明定长数组，从后往前填。时间复杂度O(2n)，空间复杂度O(n)
+
+方法三：遍历链表，直接正向存入数组，再用双指针反转。时间复杂度O(3/2n)，空间复杂度O(n)
+
+**代码：**
+
+```c++
+//方法三
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> reversePrint(ListNode* head) {
+        ListNode* cur = head;
+        vector<int> result;
+        while(cur != nullptr) {
+            result.push_back(cur->val);
+            cur = cur->next;
+        }
+        for (int i = 0; i < result.size() / 2; i++) {
+            int tmp = result[i];
+            result[i] = result[result.size() - 1 - i];
+            result[result.size() - 1 - i] = tmp;
+        }
+        return result;
+    }
+};
+```
+
+
+
+## 剑指 Offer 09. 用两个栈实现队列 [easy]
+
+[剑指 Offer 09. 用两个栈实现队列 - 力扣（LeetCode）](https://leetcode.cn/problems/yong-liang-ge-zhan-shi-xian-dui-lie-lcof/)
+
+**思路：**
+
+维护两个栈，appendSta栈口模拟队尾，seleteSta栈口模拟队首。当调用队列的append方法时，像appendSta压入元素，此栈顶元素表示队尾元素；当调用队列的delete方法时，若deleteSta不为空，直接从该栈口pop（因为该栈口模拟队首），若为空，就将元素逐一从appendSta移到deleteSta（会首尾颠倒，这就是为什么deleteSta栈口是队首），再从deleteSta栈口pop。
+
+**代码：**
+
+```c++
+class CQueue {
+public:
+    stack<int> appendSta;
+    stack<int> deleteSta;
+    CQueue() {
+    }
+    
+    void appendTail(int value) {
+        appendSta.push(value);
+    }
+    
+    int deleteHead() {
+        int result = -1;
+        if (!deleteSta.empty()) {
+            result = deleteSta.top();
+            deleteSta.pop();
+        } else {
+            int tmp;
+            while (!appendSta.empty()) {
+                tmp = appendSta.top();
+                appendSta.pop();
+                deleteSta.push(tmp);
+            }
+            if (!deleteSta.empty()) {
+                result = deleteSta.top();
+                deleteSta.pop();
+            }
+        }
+        return result;
+    }
+};
+```
+
+
+
+## [剑指 Offer 24. 反转链表 [easy]](#剑指 Offer 24. 反转链表) 
+
+
+
+## 剑指 Offer 30. 包含min函数的栈 [easy]
+
+[剑指 Offer 30. 包含min函数的栈 - 力扣（LeetCode）](https://leetcode.cn/problems/bao-han-minhan-shu-de-zhan-lcof/)
+
+**思路：**
+
+当栈顶数字确定时，那么当前栈内最小值就是唯一的。因为栈顶元素之前的元素肯定都在栈里。
+
+所以我们再维护一个栈，去记录当栈顶为当前数字的情况下，最小值是多少。
+
+**代码：**
+
+```c++
+class MinStack {
+public:
+    /** initialize your data structure here. */
+    stack<int> sta;
+    stack<int> minsta;
+    MinStack() {
+    }
+    
+    void push(int x) {
+        sta.push(x);
+        if (minsta.empty()) {
+            minsta.push(x);
+        } else minsta.push(::min(x, minsta.top()));
+    }
+    
+    void pop() {
+        sta.pop();
+        minsta.pop();
+    }
+    
+    int top() {
+        return sta.top();
+    }
+    
+    int min() {
+        return minsta.top();
+    }
+};
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * MinStack* obj = new MinStack();
+ * obj->push(x);
+ * obj->pop();
+ * int param_3 = obj->top();
+ * int param_4 = obj->min();
+ */
+```
+
+
+
+## 剑指 Offer 35. 复杂链表的复制 [medium]
+
+[剑指 Offer 35. 复杂链表的复制 - 力扣（LeetCode）](https://leetcode.cn/problems/fu-za-lian-biao-de-fu-zhi-lcof/)
+
+**思路：**
+
+若顺序创建新链表，会导致next指针和随机指针没有被创建的情况。
+
+所以我们用回溯的方式创建链表，若检查到该结点的next和random没被创建，就先创建，然后返回该结点的指针即可。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    unordered_map<Node*, Node*> map;
+    Node* copyRandomList(Node* head) {
+        if (head == nullptr) return nullptr;
+        if (!map.count(head)) {
+            Node* newHead = new Node(head->val);
+            map[head] = newHead;
+            newHead->next = copyRandomList(head->next);
+            newHead->random = copyRandomList(head->random);
+        }
+        return map[head];
+    }
+};
+```
+
+
+
+## [剑指 Offer 58-II. 左旋转字符串 [easy]](#剑指Offer | 58-II.左旋转字符串 [easy])
