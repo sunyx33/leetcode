@@ -8087,6 +8087,60 @@ public:
 
 
 
+## 剑指 Offer 11. 旋转数组的最小数字 [easy]
+
+[剑指 Offer 11. 旋转数组的最小数字 - 力扣（LeetCode）](https://leetcode.cn/problems/xuan-zhuan-shu-zu-de-zui-xiao-shu-zi-lcof/)
+
+**思路：**
+
+有序数组，二分法。
+
+所谓旋转，可以看做是数组由两个有序数组拼接而成，其中第一个有序数组的首数字一定比第二个有序数组的首数字来的大，所以只需找到第二个有序数组的起点在哪里就可以了。
+
+```
+i = 0; 
+j = nums.size() - 1; 
+m = (i + j) / 2;
+```
+
+如果nums[m] < nums[j]，此时可以断定m一定是在第二个有序数组中，所以搜索范围缩小到[i, m]
+
+如果nums[m] > nums[j]，此时可以断定m一定是在第一个有序数组中，所以搜索范围缩小到[m + 1, j]
+
+如果nums[m] = nums[j]，此时无法断定m在哪个有序数组中，但可以肯定的是删掉nums[j]并不影响我们找最小值（就算它是第二个有序数组的起点）
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int minArray(vector<int>& numbers) {
+        int i = 0;
+        int j = numbers.size() - 1;
+        // 要寻找的是第二个排序数组的首元素
+        while (i < j) {
+            int m = (i + j) / 2;
+            if (numbers[m] < numbers[j]) { // m在第二个排序数组中
+                j = m;
+            } else if (numbers[m] > numbers[j]) { // m在第一个排序数组中
+                i = m + 1;
+            } else { // 无法确定m在哪个排序数组中，但能确定的是，把nums[j]拿掉不影响我们找最小值
+                j --;
+            }
+        }
+        return numbers[i];
+    }
+};
+```
+
+
+
+
+
+
+
+
+
 ## [剑指 Offer 24. 反转链表 [easy]](#剑指 Offer 24. 反转链表) 
 
 
@@ -8176,4 +8230,100 @@ public:
 
 
 
-## [剑指 Offer 58-II. 左旋转字符串 [easy]](#剑指Offer | 58-II.左旋转字符串 [easy])
+## 剑指 Offer 50. 第一个只出现一次的字符
+
+[剑指 Offer 50. 第一个只出现一次的字符 - 力扣（LeetCode）](https://leetcode.cn/problems/di-yi-ge-zhi-chu-xian-yi-ci-de-zi-fu-lcof/comments/)
+
+**思路：**
+
+考察对哈希表（map）的使用。本体采用<char, bool>
+
+先遍历一遍字符串，如果字符只出现一次，其对应的值就是true；
+
+再遍历一遍字符串，找到第一个值为true的键
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    char firstUniqChar(string s) {
+        unordered_map<char, bool> dic;
+        for(char c : s)
+            dic[c] = dic.find(c) == dic.end(); // true说明还没出现过
+        for(char c : s)
+            if(dic[c]) return c;
+        return ' ';
+    }
+};
+```
+
+
+
+## 剑指 Offer 53 - I. 在排序数组中查找数字 I
+
+[剑指 Offer 53 - I. 在排序数组中查找数字 I - 力扣（LeetCode）](https://leetcode.cn/problems/zai-pai-xu-shu-zu-zhong-cha-zhao-shu-zi-lcof/)
+
+**思路：**
+
+二分法找到mid等于target，此时所有target都被包含在[left, right]里。
+
+找到等于的边界，左右缩短再重新使用二分。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        int left = 0;
+        int right = nums.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                if (nums[left] != target) left ++;
+                else if (nums[right] != target) right --;
+                else break;
+            }
+        }
+        return right - left + 1;
+    }
+};
+```
+
+
+
+## 剑指 Offer 53 - II. 0～n-1中缺失的数字
+
+[剑指 Offer 53 - II. 0～n-1中缺失的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/que-shi-de-shu-zi-lcof/)
+
+**思路：**
+
+有序数组用二分
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int missingNumber(vector<int>& nums) {
+        int left = 0;
+        int right = nums.size();
+        while (left < right) {
+            int mid = (left + right) / 2;
+            if (nums[mid] != mid) {
+                right = mid;
+            } else left = mid + 1;
+        }
+        return left;
+    }
+};
+```
+
+
+
+## [剑指 Offer 58 - II. 左旋转字符串 [easy]](#剑指Offer | 58-II.左旋转字符串 [easy])
