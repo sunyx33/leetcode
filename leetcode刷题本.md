@@ -2335,7 +2335,11 @@ public:
 
 没啥难度，层序遍历，遍历到每一个节点，把它的左右子节点交换一下，入队继续。
 
+也可用递归
+
 **代码：**
+
+队列：
 
 ```c++
 class Solution {
@@ -2359,6 +2363,32 @@ public:
                 que.push(cur->right);
             }
         }
+        return root;
+    }
+};
+```
+
+递归：
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* mirrorTree(TreeNode* root) {
+        if (root == nullptr) return root;
+        TreeNode* tmp = root->left;
+        root->left = root->right;
+        root->right = tmp;
+        mirrorTree(root->left);
+        mirrorTree(root->right);
         return root;
     }
 };
@@ -7909,7 +7939,7 @@ class Solution {
 
 # 剑指offer
 
-## 剑指 Offer 03. 数组中重复的数字
+## 剑指 Offer 03. 数组中重复的数字 [easy]
 
 [剑指 Offer 03. 数组中重复的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof/?favorite=xb9nqhhg)
 
@@ -8145,6 +8175,56 @@ public:
 
 
 
+## 剑指 Offer 26. 树的子结构 [medium]
+
+[剑指 Offer 26. 树的子结构 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-de-zi-jie-gou-lcof/)
+
+**思路：**
+
+两棵树同时进行对称的前序遍历（要先比较根节点），比较每个结点是否相等。
+
+从哪里开始前序遍历呢？在A中找到一个和B根节点相等的结点，看看以这两个结点为根节点的树是否相等。
+
+**代码：**
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool isSubStructure(TreeNode* A, TreeNode* B) {
+        if (A == nullptr || B == nullptr) return false; // 空树不是任意树的子树
+        if (isEqual(A, B)) return true; // 如果以A、B为根节点的两棵树相等，返回true
+        else return isSubStructure(A->left, B) || isSubStructure(A->right, B); // 否则检查A的左子树、右子树是否有和B相等的树（前序）
+    }
+
+    // 比较以A、B为根节点的树是否相等
+    bool isEqual(TreeNode* A, TreeNode* B) {
+        if (B == nullptr) return true; // 终止条件：B比到了空节点，说明上面的结点都匹配上了
+        if (A == nullptr) return false; // 终止条件：A比到了空节点但B还有，说明不匹配
+        if (A->val == B->val) return isEqual(A->left, B->left) && isEqual(A->right, B->right); // 前序
+        else return false; // 发现不相等，直接终止
+    }
+};
+```
+
+
+
+## [剑指 Offer 27. 二叉树的镜像 [easy]](#266. 翻转二叉树 [easy])
+
+
+
+## [剑指 Offer 28. 对称的二叉树 [easy]](#101. 对称二叉树 [easy])
+
+
+
 ## 剑指 Offer 30. 包含min函数的栈 [easy]
 
 [剑指 Offer 30. 包含min函数的栈 - 力扣（LeetCode）](https://leetcode.cn/problems/bao-han-minhan-shu-de-zhan-lcof/)
@@ -8199,6 +8279,100 @@ public:
 
 
 
+## 剑指 Offer 32 - I. 从上到下打印二叉树 [medium]
+
+[剑指 Offer 32 - I. 从上到下打印二叉树 - 力扣（LeetCode）](https://leetcode.cn/problems/cong-shang-dao-xia-da-yin-er-cha-shu-lcof/)
+
+**思路：**
+
+层序遍历，写不出来进厂吧
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> levelOrder(TreeNode* root) {
+        vector<int> result;
+        queue<TreeNode*> que;
+        if (root != nullptr) que.push(root);
+        while (!que.empty()) {
+            TreeNode* node = que.front();
+            result.push_back(node->val);
+            que.pop();
+            if (node->left != nullptr) que.push(node->left);
+            if (node->right != nullptr) que.push(node->right);
+        }
+        return result;
+    }
+};
+```
+
+
+
+## [剑指 Offer 32 - II. 从上到下打印二叉树 II [easy]](#102. 二叉树的层序遍历 [medium])
+
+
+
+## 剑指 Offer 32 - III. 从上到下打印二叉树 III [medium]
+
+[剑指 Offer 32 - III. 从上到下打印二叉树 III - 力扣（LeetCode）](https://leetcode.cn/problems/cong-shang-dao-xia-da-yin-er-cha-shu-iii-lcof/)
+
+**思路：**
+
+需要一个标志位标记当前结点处于单数层还是双数层。
+
+单数层从队首读结点，子节点从左到右插入队尾；双数层从队尾读结点，子节点从右到左插入队首。
+
+**代码：**
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        deque<TreeNode*> que;
+        vector<vector<int>> result;
+        bool flag = true; 
+        if (root != nullptr) que.push_back(root);
+        while (!que.empty()) {
+            int size = que.size();
+            vector<int> vec;
+            for (int i = 0; i < size; i ++) {
+                if (flag) { // true代表单数层，此时从队首读，其子结点从左到右加入队尾
+                    TreeNode* node = que.front();
+                    que.pop_front();
+                    vec.push_back(node->val);
+                    if (node->left != nullptr) que.push_back(node->left);
+                    if (node->right != nullptr) que.push_back(node->right);
+                } else { // false代表双数层，此时从队尾读，其子节点从右到左加入队头
+                    TreeNode* node = que.back();
+                    que.pop_back();
+                    vec.push_back(node->val);
+                    if(node->right != nullptr) que.push_front(node->right);
+                    if(node->left != nullptr) que.push_front(node->left);
+                } 
+            }
+            result.push_back(vec);
+            flag = !flag;
+        }
+        return result;
+    }
+};
+```
+
+
+
+
+
 ## 剑指 Offer 35. 复杂链表的复制 [medium]
 
 [剑指 Offer 35. 复杂链表的复制 - 力扣（LeetCode）](https://leetcode.cn/problems/fu-za-lian-biao-de-fu-zhi-lcof/)
@@ -8230,7 +8404,7 @@ public:
 
 
 
-## 剑指 Offer 50. 第一个只出现一次的字符
+## 剑指 Offer 50. 第一个只出现一次的字符 [easy]
 
 [剑指 Offer 50. 第一个只出现一次的字符 - 力扣（LeetCode）](https://leetcode.cn/problems/di-yi-ge-zhi-chu-xian-yi-ci-de-zi-fu-lcof/comments/)
 
@@ -8260,7 +8434,7 @@ public:
 
 
 
-## 剑指 Offer 53 - I. 在排序数组中查找数字 I
+## 剑指 Offer 53 - I. 在排序数组中查找数字 I [easy]
 
 [剑指 Offer 53 - I. 在排序数组中查找数字 I - 力扣（LeetCode）](https://leetcode.cn/problems/zai-pai-xu-shu-zu-zhong-cha-zhao-shu-zi-lcof/)
 
@@ -8297,7 +8471,7 @@ public:
 
 
 
-## 剑指 Offer 53 - II. 0～n-1中缺失的数字
+## 剑指 Offer 53 - II. 0～n-1中缺失的数字 [easy]
 
 [剑指 Offer 53 - II. 0～n-1中缺失的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/que-shi-de-shu-zi-lcof/)
 
