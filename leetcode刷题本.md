@@ -8117,6 +8117,33 @@ public:
 
 
 
+## [剑指 Offer 10- I. 斐波那契数列 [easy]](#509. 斐波那契数 [easy])
+
+
+
+## 剑指 Offer 10- II. 青蛙跳台阶问题 [easy]
+
+同[70. 爬楼梯 [easy]](#70. 爬楼梯 [easy])
+
+ 为什么要模1000000007（跟我念，一，八个零，七）。参考https://www.liuchuo.net/archives/645
+
+大数相乘，大数的排列组合等为什么要取模
+
+- 1000000007是一个质数（素数），对质数取余能最大程度避免结果冲突/重复
+- int32位的最大值为2147483647，所以对于int32位来说1000000007足够大。
+- int64位的最大值为2^63-1，用最大值模1000000007的结果求平方，不会在int64中溢出。
+- 所以在大数相乘问题中，因为(a∗b)%c=((a%c)∗(b%c))%c，所以相乘时两边都对1000000007取模，再保存在int64里面不会溢出。
+
+这道题为什么要取模，取模前后的值不就变了吗？
+
+- 确实：取模前 f(43) = 701408733, f(44) = 1134903170, f(45) = 1836311903, 但是 f(46) > 2147483647结果就溢出了。
+- _____，取模后 f(43) = 701408733, f(44) = 134903163 , f(45) = 836311896, f(46) = 971215059没有溢出。
+- 取模之后能够计算更多的情况，如 f(46)
+- 这道题的测试答案与取模后的结果一致。
+- 总结一下，这道题要模1000000007的根本原因是标准答案模了1000000007。不过大数情况下为了防止溢出，模1000000007是通用做法，原因见第一点。
+
+
+
 ## 剑指 Offer 11. 旋转数组的最小数字 [easy]
 
 [剑指 Offer 11. 旋转数组的最小数字 - 力扣（LeetCode）](https://leetcode.cn/problems/xuan-zhuan-shu-zu-de-zui-xiao-shu-zi-lcof/)
@@ -8404,6 +8431,80 @@ public:
 
 
 
+## [剑指 Offer 42. 连续子数组的最大和 [easy]](#53. 最大子序和 [medium])
+
+
+
+## 剑指 Offer 47. 礼物的最大价值 [medium]
+
+[剑指 Offer 47. 礼物的最大价值 - 力扣（LeetCode）](https://leetcode.cn/problems/li-wu-de-zui-da-jie-zhi-lcof/)
+
+**思路：**
+
+最朴素的二维dp
+
+1. dp数组以及下标的含义
+
+   dp\[i][j]：走到grid\[i][j]所能拿到的最大价值。
+
+2. 确定递推公式
+
+   grid\[i][j]只能由grid\[i-1][j]与grid\[i][j-1]走来，所以：
+
+   ```c++
+   dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+   ```
+
+3. dp数组如何初始化
+
+   由左方与上方推出，所以要初始化第一行与第一列：
+
+   ```c++
+   dp[0][0] = grid[0][0];
+   for(int i = 1; i < m; i++) {
+   	dp[i][0] = dp[i - 1][0] + grid[i][0];
+   }
+   for(int j = 1; j < n; j++) {
+   	dp[0][j] = dp[0][j - 1] + grid[0][j];
+   }
+   ```
+
+4. 确定遍历顺序
+
+   从左到右，从上到下
+
+5. 举例推导dp数组
+
+   略
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int maxValue(vector<vector<int>>& grid) {
+        int m = grid.size();
+        int n = grid[0].size();
+        vector<vector<int>> dp(m, vector<int>(n));
+        dp[0][0] = grid[0][0];
+        for(int i = 1; i < m; i++) {
+            dp[i][0] = dp[i - 1][0] + grid[i][0];
+        }
+        for(int j = 1; j < n; j++) {
+            dp[0][j] = dp[0][j - 1] + grid[0][j];
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+};
+```
+
+
+
 ## 剑指 Offer 50. 第一个只出现一次的字符 [easy]
 
 [剑指 Offer 50. 第一个只出现一次的字符 - 力扣（LeetCode）](https://leetcode.cn/problems/di-yi-ge-zhi-chu-xian-yi-ci-de-zi-fu-lcof/comments/)
@@ -8501,3 +8602,7 @@ public:
 
 
 ## [剑指 Offer 58 - II. 左旋转字符串 [easy]](#剑指Offer | 58-II.左旋转字符串 [easy])
+
+
+
+## [剑指 Offer 63. 股票的最大利润 [medium]](#121. 买卖股票的最佳时机 [easy])
