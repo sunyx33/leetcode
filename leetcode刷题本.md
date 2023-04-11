@@ -920,7 +920,7 @@ public:
 
 **代码思路：**
 
-1. 首先要把给定数据转成 `unordered_map` ，但不是一次性转完，+而是一边找一边转（如下）
+1. 首先要把给定数据转成 `unordered_map` ，但不是一次性转完，而是一边找一边转（如下）
 2. 遍历数组，寻找当前map中是否有target-nums[i]这个数字，如果有，则返回i与map中该key所对应的value。
 3. 若没有，则将 `key = nums[i],  value = i` 插入map中，继续下次循环。
 
@@ -938,7 +938,7 @@ public:
             }
             res.insert(pair<int, int>(nums[i], i));
         }
-        return {};
+        return {};在·
     }
 };
 ```
@@ -8194,6 +8194,93 @@ public:
 
 
 
+## 剑指 Offer 12. 矩阵中的路径 [medium]
+
+[剑指 Offer 12. 矩阵中的路径 - 力扣（LeetCode）](https://leetcode.cn/problems/ju-zhen-zhong-de-lu-jing-lcof/)
+
+**思路：**
+
+本问题是典型的矩阵搜索问题，可使用 **深度优先搜索（DFS）+ 剪枝** 解决。
+
+<img src="https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/1604944042-glmqJO-Picture0.png" style="zoom: 67%;" />
+
+- **递归参数：** 当前元素在矩阵 board 中的行列索引 i 和 j ，当前目标字符在 word 中的索引 k 。
+
+- **终止条件：**
+
+  返回 false：(1) 行或列索引越界 或 (2) 当前矩阵元素与目标字符不同 或 (3) 当前矩阵元素已访问过 （ (3) 可合并至 (2) ） 。
+
+  返回 true ： k = len(word) - 1 ，即字符串 word 已全部匹配。
+
+- **递推工作：**
+
+  标记当前矩阵元素： 将 board\[i][j] 修改为 空字符 '' ，代表此元素已访问过，防止之后搜索时重复访问。
+
+  搜索下一单元格： 朝当前元素的 上、下、左、右 四个方向开启下层递归，使用 或 连接 （代表只需找到一条可行路径就直接返回，不再做后续 DFS ），并记录结果至 res 。
+
+  还原当前矩阵元素： 将 board\[i][j] 元素还原至初始值，即 word[k] 。
+
+- **返回值：** 返回布尔量 `res` ，代表是否搜索到目标字符串。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        row = board.size();
+        col = board[0].size();
+        for(int i = 0; i < row; i++) {
+            for(int j = 0; j < col; j++){
+                if (dfs(board, word, i, j, 0)) return true;
+            }
+        }
+        return false;
+    }
+
+private:
+    int row, col;
+    bool dfs(vector<vector<char>>& board, string word, int i, int j, int k) {
+        if (i < 0 || i >= row || j < 0 || j >= col || board[i][j] != word[k]) return false;
+        if (k == word.size() - 1) return true;
+        board[i][j] = '\0';
+        bool res = dfs(board, word, i + 1, j, k + 1) || dfs(board, word, i - 1, j, k + 1) || dfs(board, word, i, j + 1, k + 1) || dfs(board, word, i, j - 1, k + 1);
+        board[i][j] = word[k];
+        return res;
+    }
+};
+```
+
+
+
+## 剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 [easy]
+
+[剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 - 力扣（LeetCode）](https://leetcode.cn/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/)
+
+**思路：**
+
+双指针，i指向从左看第一个偶数，j指向从又看第一个奇数，若此时i<j，则交换两个数。以此往复直至i>j为止。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> exchange(vector<int>& nums) {
+        int i = 0;
+        int j = nums.size() - 1;
+        while (i < j) {
+            while (nums[i] % 2 == 1 && i < nums.size() - 1) i ++;
+            while (nums[j] % 2 == 0 && j > 0) j --;
+            if (i < j) swap(nums[i], nums[j]);
+        }
+        return nums;
+    }
+};
+```
+
+
+
 ## 剑指 Offer 18. 删除链表的节点 [easy]
 
 [剑指 Offer 18. 删除链表的节点 - 力扣（LeetCode）](https://leetcode.cn/problems/shan-chu-lian-biao-de-jie-dian-lcof/)
@@ -8865,6 +8952,41 @@ public:
     }
 };
 ```
+
+
+
+## 剑指 Offer 57. 和为s的两个数字 [easy]
+
+[剑指 Offer 57. 和为s的两个数字 - 力扣（LeetCode）](https://leetcode.cn/problems/he-wei-sde-liang-ge-shu-zi-lcof/)
+
+**思路：**
+
+在[梦开始的地方](#1. 两数之和 [easy])之上加入了有序数组的条件，所以可以用双指针将空间缩小为O(1)，时间也是O(N)但明显快一些。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        int left = 0;
+        int right = nums.size() - 1;
+        while (left < right) {
+            int sum = nums[left] + nums[right];
+            if (sum == target) {
+                return {nums[left], nums[right]};
+            } 
+            else if (sum > target) right --;
+            else left ++; 
+        }
+        return {};
+    }
+};
+```
+
+
+
+## [剑指 Offer 58 - I. 翻转单词顺序 [easy]](#151. 翻转字符串里的单词 [medium])
 
 
 
