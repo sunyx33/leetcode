@@ -563,6 +563,8 @@ public:
 // @lc code=end
 ```
 
+
+
 ## 160. 相交链表 [easy]
 
 [160. 相交链表 - 力扣（LeetCode）](https://leetcode.cn/problems/intersection-of-two-linked-lists/)
@@ -8192,13 +8194,161 @@ public:
 
 
 
+## 剑指 Offer 18. 删除链表的节点 [easy]
 
+[剑指 Offer 18. 删除链表的节点 - 力扣（LeetCode）](https://leetcode.cn/problems/shan-chu-lian-biao-de-jie-dian-lcof/)
+
+**思路：**
+
+双指针，指向要删除的节点和其前一个结点
+
+**代码：**
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* deleteNode(ListNode* head, int val) {
+        if (head->val == val) {
+            return head->next;
+        }
+        ListNode* pre = head;
+        ListNode* cur = head->next;
+        while(cur != NULL) {
+            if(cur->val == val) {
+                pre->next = cur->next;
+                break;
+            } else {
+                pre = cur;
+                cur = cur->next;
+            }
+        }
+        return head;
+    }
+};
+```
+
+
+
+## 剑指 Offer 22. 链表中倒数第k个节点 [easy]
+
+[剑指 Offer 22. 链表中倒数第k个节点 - 力扣（LeetCode）](https://leetcode.cn/problems/lian-biao-zhong-dao-shu-di-kge-jie-dian-lcof/)
+
+**思路：**
+
+快慢指针，快指针先往前走k步，再一起走直至快指针走到最后。
+
+**代码：**
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* getKthFromEnd(ListNode* head, int k) {
+        ListNode* start = head;
+        ListNode* end = head;
+        while(k - 1) {
+            end = end->next;
+            k--;
+        }
+        while(end->next) {
+            start = start->next;
+            end = end->next;
+        }
+        return start;
+    }
+};
+```
 
 
 
 
 
 ## [剑指 Offer 24. 反转链表 [easy]](#剑指 Offer 24. 反转链表) 
+
+
+
+## 剑指 Offer 25. 合并两个排序的链表 [easy]
+
+[剑指 Offer 25. 合并两个排序的链表 - 力扣（LeetCode）](https://leetcode.cn/problems/he-bing-liang-ge-pai-xu-de-lian-biao-lcof/?envType=study-plan&id=lcof&plan=lcof&plan_progress=xxzaydft)
+
+**思路：**
+
+建立一个pre指针，一开始指向假头，然后比较l1与l2当前结点的大小，选择小的那一个做pre的next，pre后移，被选的那个结点后移。
+
+**代码：**
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+        ListNode* dummyHead = new ListNode(0);
+        ListNode* pre = dummyHead;
+        while (l1 && l2) {
+            if (l1->val < l2->val) {
+                pre->next = l1;
+                pre = pre->next;
+                l1 = l1->next;
+            } else {
+                pre->next = l2;
+                pre = pre->next;
+                l2 = l2->next;
+            }
+        }
+        if (l1) pre->next = l1;
+        if (l2) pre->next = l2;
+        return dummyHead->next;
+    }
+};
+```
+
+另附递归法，优雅但写不出来：
+
+```c++
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+        if (!l1) return l2;
+        if (!l2) return l1;
+        ListNode* result = NULL;
+        if(l1->val < l2->val) {
+            result = l1;
+            result->next = mergeTwoLists(l1->next, l2);
+        }
+        else {
+            result = l2;
+            result->next = mergeTwoLists(l1, l2->next);
+        }
+        return result;
+    }
+};
+```
+
+
+
+## 
 
 
 
@@ -8435,6 +8585,76 @@ public:
 
 
 
+## 剑指 Offer 46. 把数字翻译成字符串 [medium]
+
+[剑指 Offer 46. 把数字翻译成字符串 - 力扣（LeetCode）](https://leetcode.cn/problems/ba-shu-zi-fan-yi-cheng-zi-fu-chuan-lcof/?envType=study-plan&id=lcof&plan=lcof&plan_progress=xxzaydft)
+
+**思路：**
+
+**一言以蔽之：抽象版的爬楼梯问题**
+
+1. dp数组以及下标的含义
+
+   dp[i]：[0, i]能组成几种不同字符串
+
+2. 确定递推公式
+
+   如果nums[i - 1]与nums[i]所组成的二位数在[10, 25]之中（可以翻译成字母），那么就有组成与单独算两种路：
+
+   ```
+   dp[i] = dp[i - 1] + dp[i - 2];
+   ```
+
+   如果不能组成这样一个二位数，那就只有单独算nums[i]一条路：
+
+   ```
+   dp[i] = dp[i - 1];
+   ```
+
+3. dp数组如何初始化
+
+   ```c++
+   dp[0] = 1;
+   if (s[0] == 49 || (s[0] == 50 && s[1] < 54)) dp[1] = 2;  // 49即是字符1的ascii码
+   else dp[1] = 1;
+   ```
+
+4. 确定遍历顺序
+
+   从左到右
+
+5. 举例推导dp数组
+
+   略
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int translateNum(int num) {
+        string s = to_string(num);
+        if (s.size() == 1) return 1;
+        vector<int> dp(2);
+        dp[0] = 1;
+        if (s[0] == 49 || (s[0] == 50 && s[1] < 54)) dp[1] = 2;
+        else dp[1] = 1;
+        for (int i = 2; i < s.size(); i++) {
+            if (s[i - 1] == 49 || (s[i - 1] == 50 && s[i] < 54)) {
+                int sum = dp[1] + dp[0];
+                dp[0] = dp[1];
+                dp[1] = sum;
+            } else {
+                dp[0] = dp[1];
+            }
+        }
+        return dp[1];
+    }
+};
+```
+
+
+
 ## 剑指 Offer 47. 礼物的最大价值 [medium]
 
 [剑指 Offer 47. 礼物的最大价值 - 力扣（LeetCode）](https://leetcode.cn/problems/li-wu-de-zui-da-jie-zhi-lcof/)
@@ -8505,13 +8725,56 @@ public:
 
 
 
+## 剑指 Offer 48. 最长不含重复字符的子字符串 [medium]
+
+[剑指 Offer 48. 最长不含重复字符的子字符串 - 力扣（LeetCode）](https://leetcode.cn/problems/zui-chang-bu-han-zhong-fu-zi-fu-de-zi-zi-fu-chuan-lcof/)
+
+**思路：**
+
+用map去记录遍历过的字符与其对应的索引，每遍历到一个字母，去查map，如果map没有，对应滑窗末端向后移一位操作；如果map有，查找map中所对应的那个索引是否在滑窗中，若不在就滑窗末端向后移一位，更新map该字母最后出现的索引；若在滑窗中，就更新滑窗起点为该字母后一个，末端后移。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        if(s.size() == 0) return 0;
+        unordered_map<char, int> umap;
+        int result = 1;
+        int count = 1;
+        int start = 0;
+        umap.emplace(s[0], 0);
+        for(int i = 1; i < s.size(); i++) {
+            if (umap.find(s[i]) == umap.end()) {
+                cout << s[i] << endl;
+                umap.emplace(s[i], i);
+                count ++;
+                if(count > result) result = count;
+            } else if (umap[s[i]] < start) {
+                umap[s[i]] = i;
+                count ++;
+                if(count > result) result = count;
+            } else {
+                start = umap[s[i]] + 1;
+                count = i - start + 1;
+                umap[s[i]] = i;
+            }
+        }
+        return result;
+    }
+};
+```
+
+
+
 ## 剑指 Offer 50. 第一个只出现一次的字符 [easy]
 
 [剑指 Offer 50. 第一个只出现一次的字符 - 力扣（LeetCode）](https://leetcode.cn/problems/di-yi-ge-zhi-chu-xian-yi-ci-de-zi-fu-lcof/comments/)
 
 **思路：**
 
-考察对哈希表（map）的使用。本体采用<char, bool>
+考察对哈希表（map）的使用。本题采用<char, bool>
 
 先遍历一遍字符串，如果字符只出现一次，其对应的值就是true；
 
@@ -8532,6 +8795,10 @@ public:
     }
 };
 ```
+
+
+
+## [剑指 Offer 52. 两个链表的第一个公共节点 [easy]](#160. 相交链表 [easy])
 
 
 
