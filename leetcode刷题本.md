@@ -8253,6 +8253,95 @@ private:
 
 
 
+## 剑指 Offer 13. 机器人的运动范围 [medium]
+
+[面试题13. 机器人的运动范围 - 力扣（LeetCode）](https://leetcode.cn/problems/ji-qi-ren-de-yun-dong-fan-wei-lcof/?envType=study-plan&id=lcof&plan=lcof&plan_progress=xxzaydft)
+
+**思路：**
+
+首先明确如何计算数位和：
+
+- 常规方法：
+
+  ```c++
+  int digitSum(int m, int n) {
+      int sum = 0;
+      while (m > 0 || n > 0) {
+          sum += m % 10 + n % 10;
+          m /= 10;
+          n /= 10;
+      }
+      return sum;
+  }
+  ```
+
+- 适用于本题用例范围的方法：
+
+  突变发生于整十处（例如19 -> 20），比前一个数位和-8，不然就只是+1
+
+  ```c++
+  (i + 1) % 10 != 0 ? si + 1 : si - 8
+  ```
+
+根据数位和增量公式得知，数位和每逢**进位**突变一次。根据此特点，矩阵中满足数位和的解构成的几何形状形如多个**等腰直角三角形**，每个三角形的直角顶点位于 0, 10, 20, ... 等数位和突变的矩阵索引处 。
+
+三角形内的解虽然都满足数位和要求，但由于机器人每步只能走一个单元格，而三角形间不一定是连通的，因此机器人不一定能到达，称之为**不可达解**；同理，可到达的解称为**可达解**（本题求此解） 。
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/1603026306-jCBpqd-Picture2.png)
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/1603026306-HAMNPH-Picture5.png)
+
+根据可达解的结构和连通性，易推出机器人可**仅通过向右和向下移动，访问所有可达解** 。
+
+**代码：**
+
+dfs：
+
+```
+class Solution {
+public:
+    int movingCount(int m, int n, int k) {
+        vector<vector<bool>> visited(m, vector<bool>(n, false));
+        return dfs(0, 0, 0, 0, visited, m, n, k);
+    }
+
+    int dfs(int i, int j, int si, int sj, vector<vector<bool>>& visited, int m, int n, int k) {
+        if(i >= m || j >= n || si + sj > k || visited[i][j]) return 0;
+        visited[i][j] = true;
+        return 1 + dfs(i + 1, j, (i + 1) % 10 != 0 ? si + 1 : si - 8, sj, visited, m, n, k) + 
+                   dfs(i, j + 1, si, (j + 1) % 10 != 0 ? sj + 1 : sj - 8, visited, m, n, k);
+    }
+
+};
+```
+
+bfs：
+
+```c++
+class Solution {
+public:
+    int movingCount(int m, int n, int k) {
+        vector<vector<bool>> visited(m, vector<bool>(n, 0));
+        int res = 0;
+        queue<vector<int>> que;
+        que.push({ 0, 0, 0, 0 });
+        while(que.size() > 0) {
+            vector<int> x = que.front();
+            que.pop();
+            int i = x[0], j = x[1], si = x[2], sj = x[3];
+            if(i >= m || j >= n || k < si + sj || visited[i][j]) continue;
+            visited[i][j] = true;
+            res++;
+            que.push({ i + 1, j, (i + 1) % 10 != 0 ? si + 1 : si - 8, sj });
+            que.push({ i, j + 1, si, (j + 1) % 10 != 0 ? sj + 1 : sj - 8 });
+        }
+        return res;
+    }
+};
+```
+
+
+
 ## 剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 [easy]
 
 [剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 - 力扣（LeetCode）](https://leetcode.cn/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/)
@@ -8635,6 +8724,53 @@ public:
 
 
 
+## 剑指 Offer 34. 二叉树中和为某一值的路径 [medium] 
+
+[剑指 Offer 34. 二叉树中和为某一值的路径 - 力扣（LeetCode）](https://leetcode.cn/problems/er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing-lcof/)
+
+**思路：**
+
+与[112. 路径总和](#112. 路径总和 [easy])相似，本题在此基础上需要找到所有路径，需要遍历整棵树而不是找到一条就直接跳出。
+
+注意结点有负数，所以不能想当然做剪枝。
+
+**代码：**
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void preorder(TreeNode* root, int targetSum, int& sum, vector<int>& path, vector<vector<int>>& result) {
+        sum += root->val;
+        path.push_back(root->val);
+        if(sum == targetSum && root->left == nullptr && root->right == nullptr) result.push_back(path);
+        if(root->left != nullptr) preorder(root->left, targetSum, sum, path, result);
+        if(root->right != nullptr) preorder(root->right, targetSum, sum, path, result);
+
+        sum -= root->val;
+        path.pop_back();
+    }
+
+    vector<vector<int>> pathSum(TreeNode* root, int targetSum) {
+        int sum = 0;
+        vector<int> path;
+        vector<vector<int>> result;
+        if (root != nullptr) preorder(root, targetSum, sum, path, result);
+        return result;    
+    }
+};
+```
+
 
 
 ## 剑指 Offer 35. 复杂链表的复制 [medium]
@@ -8668,7 +8804,181 @@ public:
 
 
 
+## 剑指 Offer 36. 二叉搜索树与双向链表 [medium]
+
+[剑指 Offer 36. 二叉搜索树与双向链表 - 力扣（LeetCode）](https://leetcode.cn/problems/er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-lcof/)
+
+**思路：**
+
+搜索二叉树的中序遍历是有序的，故首先确定选择中序遍历。
+
+由于需要原地改变指针，所以不能改变还没遍历到的结点相关的指针。故记录前结点（已经遍历过）pre与当前结点cur（正在遍历，可以确定在链表中是pre的后续结点，因为中序遍历），让这两个结点互相指。
+
+如何成环？记录头节点与尾结点即可。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    Node* treeToDoublyList(Node* root) {
+        if(!root) return root;
+        inorder(root);
+        pre->right = head;
+        head->left = pre;
+        return head;
+    }
+
+private:
+    Node* pre;
+    Node* head; // 记录链表的头结点，即中序遍历的第一个结点（此时pre为空）
+    void inorder(Node* cur) {
+        if(cur == nullptr) return;
+        inorder(cur->left);
+        if(pre == nullptr) {
+            head = cur;
+            pre = cur;
+        } else {
+            cur->left = pre;
+            pre->right = cur;
+            pre = cur;
+        }
+        inorder(cur->right);
+    }
+};
+```
+
+
+
+## 剑指 Offer 40. 最小的k个数 [easy]
+
+[剑指 Offer 40. 最小的k个数 - 力扣（LeetCode）](https://leetcode.cn/problems/zui-xiao-de-kge-shu-lcof/)
+
+**思路：**
+
+1. 快排
+
+   首先给出快排的模板（建议背过）：[11.4.  快速排序 - Hello 算法 (hello-algo.com)](https://www.hello-algo.com/chapter_sorting/quick_sort/)
+
+   在快排的基础上加以优化：
+
+   块排每次划分完数据后，基准数 (nums[i]) 就是第i + 1大的数，那么如果某次划分完i == k，那么仅需返回nums[i]之前的数字即可，不必做完排序了。
+
+   若 i > k ，代表第 k + 1 小的数字在 **左子数组** 中，则递归左子数组；
+
+   若 i < k ，代表第 k + 1 小的数字在 **右子数组** 中，则递归右子数组；
+
+2. 堆
+
+   我们用一个大根堆实时维护数组的前 k 小值。首先将前 k 个数插入大根堆中，随后从第 k+1 个数开始遍历，如果当前遍历到的数比大根堆的堆顶的数要小，就把堆顶的数弹出，再插入当前遍历到的数。最后将大根堆里的数存入数组返回即可。在下面的代码中，由于 C++ 语言中的堆（即优先队列）为大根堆，我们可以这么做。
+
+**代码：**
+
+快排：
+
+```c++
+class Solution {
+public:
+    vector<int> getLeastNumbers(vector<int>& arr, int k) {
+        if (k >= arr.size()) return arr;
+        return quickSort(arr, k, 0, arr.size() - 1);
+    }
+private:
+    vector<int> quickSort(vector<int>& arr, int k, int l, int r) {
+        int i = l, j = r;
+        while (i < j) {
+            while (i < j && arr[j] >= arr[l]) j--;
+            while (i < j && arr[i] <= arr[l]) i++;
+            swap(arr[i], arr[j]);
+        }
+        swap(arr[i], arr[l]);
+        if (i > k) return quickSort(arr, k, l, i - 1);
+        if (i < k) return quickSort(arr, k, i + 1, r);
+        vector<int> res;
+        res.assign(arr.begin(), arr.begin() + k);
+        return res;
+    }
+};
+```
+
+堆：
+
+```c++
+class Solution {
+public:
+    vector<int> getLeastNumbers(vector<int>& arr, int k) {
+        vector<int> vec(k, 0);
+        if (k == 0) { // 排除 0 的情况
+            return vec;
+        }
+        priority_queue<int> Q;
+        for (int i = 0; i < k; ++i) {
+            Q.push(arr[i]);
+        }
+        for (int i = k; i < (int)arr.size(); ++i) {
+            if (Q.top() > arr[i]) {
+                Q.pop();
+                Q.push(arr[i]);
+            }
+        }
+        for (int i = 0; i < k; ++i) {
+            vec[i] = Q.top();
+            Q.pop();
+        }
+        return vec;
+    }
+};
+```
+
+
+
 ## [剑指 Offer 42. 连续子数组的最大和 [easy]](#53. 最大子序和 [medium])
+
+
+
+## 剑指 Offer 45. 把数组排成最小的数 [medium]
+
+[面试题45. 把数组排成最小的数 - 力扣（LeetCode）](https://leetcode.cn/problems/ba-shu-zu-pai-cheng-zui-xiao-de-shu-lcof/)
+
+**思路：**
+
+排序，只不过这个排序标准为：
+
+```c++
+// 3, 30  303 < 330 --> 30 < 3
+static bool cmp(string a, string b) {
+    return a + b < b + a;
+}
+```
+
+实在很惊艳。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    string minNumber(vector<int>& nums) {
+        vector<string> s;
+        for(int num : nums) {
+            s.emplace_back(to_string(num));
+        }
+
+        sort(s.begin(), s.end(), cmp);
+        
+        string res = "";
+        for(string si : s) {
+            res += si;
+        }
+        return res;
+    }
+
+private:
+    static bool cmp(string a, string b) {
+        return a + b < b + a;
+    }
+};
+```
 
 
 
@@ -8955,6 +9265,51 @@ public:
 
 
 
+## 剑指 Offer 54. 二叉搜索树的第k大节点 [easy]
+
+[剑指 Offer 54. 二叉搜索树的第k大节点 - 力扣（LeetCode）](https://leetcode.cn/problems/er-cha-sou-suo-shu-de-di-kda-jie-dian-lcof/)
+
+**思路：**
+
+搜索树，左中右是递增，右中左就是递减了。
+
+所以用右中左遍历，遍历到第k个结点就是题目所求的第k大的结点。
+
+**代码：**
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int kthLargest(TreeNode* root, int k) {
+        inorder(root, k);
+        return res;
+    }
+
+private:
+    int res;
+    int cnt;
+    void inorder(TreeNode* cur, int k) {
+        if (!cur) return;
+        if(cnt != k) inorder(cur->right, k);
+        if(++cnt == k) {
+            res = cur->val;
+        }
+        if(cnt != k) inorder(cur->left, k);
+    }
+};
+```
+
+
+
 ## 剑指 Offer 57. 和为s的两个数字 [easy]
 
 [剑指 Offer 57. 和为s的两个数字 - 力扣（LeetCode）](https://leetcode.cn/problems/he-wei-sde-liang-ge-shu-zi-lcof/)
@@ -8991,6 +9346,37 @@ public:
 
 
 ## [剑指 Offer 58 - II. 左旋转字符串 [easy]](#剑指Offer | 58-II.左旋转字符串 [easy])
+
+
+
+## 剑指 Offer 61. 扑克牌中的顺子 [easy]
+
+[面试题61. 扑克牌中的顺子 - 力扣（LeetCode）](https://leetcode.cn/problems/bu-ke-pai-zhong-de-shun-zi-lcof/)
+
+**思路：**
+
+<img src="https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/df03847e2d04a3fcb5649541d4b6733fb2cb0d9293c3433823e04935826c33ef-Picture1.png" style="zoom: 67%;" />
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool isStraight(vector<int>& nums) {
+        unordered_set<int> set;
+        int minN = 14;
+        int maxN = 0;
+        for(int num : nums) {
+            if (num == 0) continue;
+            else if(set.find(num) == set.end()) set.emplace(num);
+            else return false;
+            minN = min(minN, num);
+            maxN = max(maxN, num);
+        }
+        return maxN - minN < 5;
+    }
+};
+```
 
 
 
