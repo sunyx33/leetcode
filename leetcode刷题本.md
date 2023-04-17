@@ -2873,7 +2873,7 @@ public:
 
 **思路：**
 
-和105一样，只不过分割点从后序的最后一个变成了前序的第一个。
+和106一样，只不过分割点从后序的最后一个变成了前序的第一个。
 
 > **前序和后序不能唯一构成一棵二叉树！！**
 
@@ -8073,6 +8073,10 @@ public:
 
 
 
+## [剑指 Offer 07. 重建二叉树 [medium]](#105. 从前序与中序遍历序列构造二叉树 [easy])
+
+
+
 ## 剑指 Offer 09. 用两个栈实现队列 [easy]
 
 [剑指 Offer 09. 用两个栈实现队列 - 力扣（LeetCode）](https://leetcode.cn/problems/yong-liang-ge-zhan-shi-xian-dui-lie-lcof/)
@@ -8336,6 +8340,82 @@ public:
             que.push({ i, j + 1, si, (j + 1) % 10 != 0 ? sj + 1 : sj - 8 });
         }
         return res;
+    }
+};
+```
+
+
+
+## 剑指 Offer 15. 二进制中1的个数 [easy]
+
+[剑指 Offer 15. 二进制中1的个数 - 力扣（LeetCode）](https://leetcode.cn/problems/er-jin-zhi-zhong-1de-ge-shu-lcof/)
+
+**思路：**
+
+1. 每次左移移位(>>)，并判断最右边是否为1
+
+2. n & (n - 1)
+
+   ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230417203404698.png)
+
+   做多少次该操作后n == 0，即表明有多少个1（每次消去一个）
+
+**代码：**
+
+```c++
+// 方法一
+class Solution {
+public:
+    int hammingWeight(uint32_t n) {
+        int count = 0;
+        for (int i = 0; i < 32; i++) {
+            if(n & 1) count ++;
+            n = n >> 1;
+        }
+        return count;
+    }
+};
+
+// 方法二
+class Solution {
+public:
+    int hammingWeight(uint32_t n) {
+        int count = 0;
+        while(n) {
+            n &= n - 1;
+            count ++;
+        }
+        return count;
+    }
+};
+```
+
+
+
+## 剑指 Offer 16. 数值的整数次方 [medium]
+
+[剑指 Offer 16. 数值的整数次方 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-zhi-de-zheng-shu-ci-fang-lcof/)
+
+**思路：**
+
+快速幂：
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230417144904051.png)
+
+时间复杂度从硬算的O(n)退化为O(logn)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    double myPow(double x, int n) {
+        if(n == 0) return 1;
+        if(n == 1) return x;
+        if(n == -1) return 1 / x;
+        double half = myPow(x, n >> 1); // n / 2
+        double mod = myPow(x, n & 1);   // n & 1表示n是否为奇数（返回1是，返回0不是） 
+        return half * half * mod;
     }
 };
 ```
@@ -8724,6 +8804,42 @@ public:
 
 
 
+## 剑指 Offer 33. 二叉搜索树的后序遍历序列 [medium]
+
+[剑指 Offer 33. 二叉搜索树的后序遍历序列 - 力扣（LeetCode）](https://leetcode.cn/problems/er-cha-sou-suo-shu-de-hou-xu-bian-li-xu-lie-lcof/)
+
+**思路：**
+
+后续遍历数组最后一个数是根节点，那么从前往后找到第一个大于根节点的数字，这个数字之前是根节点的左子树，所有数字小于根节点；之后（包括这个数字）是根节点的右子树，所有数字均大于根节点。若不符合就返回false，符合就继续递归地判断左子树与右子树。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool verifyPostorder(vector<int>& postorder) {
+        if(postorder.size() <= 2) return true;
+        int i = 0;
+        int rootValue = postorder[postorder.size() - 1];
+        for( ; i < postorder.size() - 1; i++) {
+            if(postorder[i] > rootValue) break;
+        }
+        int m = i;
+        for( ; i < postorder.size() - 1; i++) {
+            if(postorder[i] < rootValue) break;
+        }
+        if(i < postorder.size() - 1) return false;
+
+        vector<int> leftPostorder(postorder.begin(), postorder.begin() + m);
+        vector<int> rightPostorder(postorder.begin() + m, postorder.end() - 1);
+
+        return verifyPostorder(leftPostorder) && verifyPostorder(rightPostorder);
+    }
+};
+```
+
+
+
 ## 剑指 Offer 34. 二叉树中和为某一值的路径 [medium] 
 
 [剑指 Offer 34. 二叉树中和为某一值的路径 - 力扣（LeetCode）](https://leetcode.cn/problems/er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing-lcof/)
@@ -8850,6 +8966,8 @@ private:
 
 
 
+
+
 ## 剑指 Offer 40. 最小的k个数 [easy]
 
 [剑指 Offer 40. 最小的k个数 - 力扣（LeetCode）](https://leetcode.cn/problems/zui-xiao-de-kge-shu-lcof/)
@@ -8926,6 +9044,53 @@ public:
             Q.pop();
         }
         return vec;
+    }
+};
+```
+
+
+
+## 剑指 Offer 41. 数据流中的中位数 [hard]
+
+[剑指 Offer 41. 数据流中的中位数 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-ju-liu-zhong-de-zhong-wei-shu-lcof/)
+
+**思路：**
+
+用两个优先队列，假设数组是从小到大排序的，那么我用queMin记录数组的前半部分，它是个大顶堆，堆顶即数组中位数（如果是偶数长度，需要和queMax堆顶求平均）；用queMax记录数组后半部分，它是一个小顶堆，堆顶是数组中位数的后一个数（奇数）或中位数（偶数，平均）
+
+所以，如果数组长度是奇数，则queMin比queMax多一个数，否则两个一样长。
+
+**代码：**
+
+```c++
+class MedianFinder {
+public:
+    priority_queue<int, vector<int>, less<int>> queMin; // 大顶堆
+    priority_queue<int, vector<int>, greater<int>> queMax; // 小顶堆
+
+    MedianFinder() {}
+
+    void addNum(int num) {
+        if (queMin.empty() || num <= queMin.top()) {
+            queMin.push(num);
+            if (queMin.size() > queMax.size() + 1) {
+                queMax.push(queMin.top());
+                queMin.pop();
+            }
+        } else {
+            queMax.push(num);
+            if (queMax.size() > queMin.size()) {
+                queMin.push(queMax.top());
+                queMax.pop();
+            }
+        }
+    }
+
+    double findMedian() {
+        if (queMin.size() > queMax.size()) {
+            return queMin.top();
+        }
+        return (queMin.top() + queMax.top()) / 2.0;
     }
 };
 ```
@@ -9310,6 +9475,14 @@ private:
 
 
 
+## [剑指 Offer 55 - I. 二叉树的深度 [easy]](#104. 二叉树的最大深度 [easy])
+
+
+
+## [剑指 Offer 55 - II. 平衡二叉树 [easy]](#110. 平衡二叉树 [easy])
+
+
+
 ## 剑指 Offer 57. 和为s的两个数字 [easy]
 
 [剑指 Offer 57. 和为s的两个数字 - 力扣（LeetCode）](https://leetcode.cn/problems/he-wei-sde-liang-ge-shu-zi-lcof/)
@@ -9349,6 +9522,8 @@ public:
 
 
 
+
+
 ## 剑指 Offer 61. 扑克牌中的顺子 [easy]
 
 [面试题61. 扑克牌中的顺子 - 力扣（LeetCode）](https://leetcode.cn/problems/bu-ke-pai-zhong-de-shun-zi-lcof/)
@@ -9381,3 +9556,109 @@ public:
 
 
 ## [剑指 Offer 63. 股票的最大利润 [medium]](#121. 买卖股票的最佳时机 [easy])
+
+
+
+## 剑指 Offer 64. 求1+2+…+n [medium]
+
+[剑指 Offer 64. 求1+2+…+n - 力扣（LeetCode）](https://leetcode.cn/problems/qiu-12n-lcof/)
+
+**思路：**
+
+有点意思，直接看代码吧
+
+**代码：**
+
+求和公式，求size()相当于相乘，移位运算符当做除以2：
+
+```c++
+class Solution {
+public:
+    int sumNums(int n) {
+        bool arr[n][n+1];
+        return sizeof(arr)>>1;
+    }
+};
+```
+
+语言特性，&&运算符，第一个条件为false就不会去判断第二个了：
+
+```c++
+class Solution {
+public:
+    int sumNums(int n) {
+        int res = n;
+        n && (res += sumNums(n-1));
+        return res;
+    }
+};
+```
+
+
+
+## 剑指 Offer 65. 不用加减乘除做加法 [easy]
+
+[剑指 Offer 65. 不用加减乘除做加法 - 力扣（LeetCode）](https://leetcode.cn/problems/bu-yong-jia-jian-cheng-chu-zuo-jia-fa-lcof/)
+
+**思路：**
+
+不计入进位的求和：为按位异或：
+
+```
+// a ^ b:
+0 0 1
+0 0 1 ^
+—————-
+0 0 0 (c)
+```
+
+记录进位信息，为按位与后左移一位：
+
+```
+// (a & b) << 1:
+0 0 1
+0 0 1 & <<
+—————-
+0 1 0 (n)
+```
+
+n与c继续进行按位异或，按位与并左移，直至n为0，就表明无进位，那么此轮计算的异或结果就是最终结果
+
+```
+// n ^ c
+0 0 0
+0 1 0 ^
+------
+0 1 0 (c) (最终结果)
+
+// (n & c) << 1
+0 0 0
+0 1 0 & <<
+------
+0 0 0 (n)
+```
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int add(int a, int b) {
+        int sum = a;
+        while(b != 0) {
+            sum = a ^ b;
+            b = (unsigned int)(a & b) << 1; //LC c++不支持负值左移，需要强制转换为无符号数
+            a = sum;
+        }
+        return sum;
+    }
+};
+```
+
+
+
+## [剑指 Offer 68 - I. 二叉搜索树的最近公共祖先 [easy]](#235. 二叉搜索树的最近公共祖先 [medium])
+
+
+
+## [剑指 Offer 68 - II. 二叉树的最近公共祖先 [easy]](#236. 二叉树的最近公共祖先 [medium])
