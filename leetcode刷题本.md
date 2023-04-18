@@ -9823,7 +9823,7 @@ public:
 
 **代码：**
 
-```
+```c++
 class Solution {
 public:
     vector<int> constructArr(vector<int>& a) {
