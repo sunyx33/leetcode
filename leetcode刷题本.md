@@ -8966,6 +8966,64 @@ private:
 
 
 
+## 剑指 Offer 39. 数组中出现次数超过一半的数字 [easy]
+
+[剑指 Offer 39. 数组中出现次数超过一半的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-zu-zhong-chu-xian-ci-shu-chao-guo-yi-ban-de-shu-zi-lcof/)
+
+**思路：**
+
+直接看代码吧
+
+**代码：**
+
+```c++
+//解法一：排序取中位数
+//时间O(nlogn)，空间O(1)
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        return nums[nums.size()/2];
+    }
+};
+
+//解法二：建立哈希表法
+//时间O(n)，空间O(n/2)
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        unordered_map<int,int> hash;
+        int res = 0, len = nums.size();
+        for(int i = 0; i < len; i++){
+            hash[nums[i]]++;
+            //不必等到哈希表完全建立再进行此判断
+            if(hash[nums[i]] > len/2)
+                res = nums[i];
+        }
+        return res;
+    }
+};
+
+//解法三：摩尔投票法
+//也可以理解成混战极限一换一，不同的两者一旦遇见就同归于尽，最后活下来的值都是相同的，即要求的结果
+//时间O(n)，空间O(1)
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        int res = 0, count = 0;
+        for(int i = 0; i < nums.size(); i++){
+            if(count == 0){
+                res = nums[i];
+                count++;
+            }
+            else
+                res==nums[i] ? count++:count--;
+        }
+        return res;
+    }
+};
+```
+
 
 
 ## 剑指 Offer 40. 最小的k个数 [easy]
@@ -9483,6 +9541,104 @@ private:
 
 
 
+## 剑指 Offer 56 - I. 数组中数字出现的次数 [medium]
+
+[剑指 Offer 56 - I. 数组中数字出现的次数 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-lcof/)
+
+**思路：**
+
+要求空间时间O(n)，空间O(1)，就排除了哈希表查找与暴力方法
+
+首先明确：两个相同的数异或结果为0，不同的数异或结果不为0，一个数与0异或结果是这个数本身。**异或运算满足交换律（与顺序无关）。**
+
+那么，将nums里的数挨个进行异或，最终得到的结果应该是两个不同的数a与b的异或结果。
+
+那么，如何区分a与b呢？思路是将a与b分到两组中，两组数字分别异或得到a与b。
+
+如何划分两个数组？两个相同的数字自然二进制每一位都一样，两个不同的数字自然在二进制某些位不同，具体哪些位不同？异或结果为1的那些位。
+
+那么，我们随便选异或结果为1的一位作为判别标准，将nums分为两组即可。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> singleNumbers(vector<int>& nums) {
+        int k = 0;
+        for(int num : nums) {
+            k ^= num;
+        }
+
+        int m = 1;
+        while((m & k) == 0) { // 选取异或结果为1的最左一位
+            m <<= 1;
+        }
+
+        int a = 0;
+        int b = 0;
+        for(int num : nums) {
+            if((num & m) == 0) {
+                a ^= num;
+            } else {
+                b ^= num;
+            }
+        }
+        return {a, b};
+    }
+};
+```
+
+
+
+## 剑指 Offer 56 - II. 数组中数字出现的次数 II [medium]
+
+[剑指 Offer 56 - II. 数组中数字出现的次数 II - 力扣（LeetCode）](https://leetcode.cn/problems/shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-ii-lcof/)
+
+**思路：**
+
+试想，统计所有数字二进制每一位出现1的次数，会发现不是3的整数倍次数的位就是单独那个数字为1的位
+
+所以，用一个数组记录二进制每一位出现的次数，最终%3，查找余1的位。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int singleNumber(vector<int>& nums) {
+        vector<int> ones(32);
+        for(int num : nums) {
+            for(int j = 0; j < 32; j++) {
+                ones[j] += num & 1;
+                num >>= 1;
+            }
+        }
+        int res = 0;
+        for(int i = 0; i < 32; i++) {
+            res |= (ones[i] % 3) <<i;
+        }
+        return res;
+    }
+};
+```
+
+当然，不想搞花里胡哨的也可以用map，空间复杂度o(n)
+
+```c++
+class Solution {
+public:
+    int singleNumber(vector<int>& nums) {
+        unordered_map<int, int> mp;
+        for(auto& e : nums) mp[e]++;
+        for(auto k : mp) if(k.second == 1) return k.first;
+        return 1;
+    }
+};
+```
+
+
+
 ## 剑指 Offer 57. 和为s的两个数字 [easy]
 
 [剑指 Offer 57. 和为s的两个数字 - 力扣（LeetCode）](https://leetcode.cn/problems/he-wei-sde-liang-ge-shu-zi-lcof/)
@@ -9654,6 +9810,38 @@ public:
     }
 };
 ```
+
+
+
+## 剑指 Offer 66. 构建乘积数组 [medium]
+
+[剑指 Offer 66. 构建乘积数组 - 力扣（LeetCode）](https://leetcode.cn/problems/gou-jian-cheng-ji-shu-zu-lcof/)
+
+**思路：**
+
+先从左往右乘，乘到第 i 位将结果赋予 b[i] ，再从右往左乘，乘到第 i 位将结果乘以 b[i]，赋予 b[i]。
+
+**代码：**
+
+```
+class Solution {
+public:
+    vector<int> constructArr(vector<int>& a) {
+        vector<int> B(a.size());
+        int product = 1;
+        for(int i = 0; i < a.size(); product *= a[i++]) {
+            B[i] = product;
+        }
+        product = 1;
+        for(int i = a.size() - 1; i >= 0; product *= a[i--]) {
+            B[i] *= product;
+        }
+        return B;
+    }
+};
+```
+
+
 
 
 
