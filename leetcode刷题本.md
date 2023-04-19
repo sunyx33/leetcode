@@ -8346,6 +8346,10 @@ public:
 
 
 
+## [剑指 Offer 14- I. 剪绳子 [medium]](#343. 整数拆分 [medium])
+
+
+
 ## 剑指 Offer 15. 二进制中1的个数 [easy]
 
 [剑指 Offer 15. 二进制中1的个数 - 力扣（LeetCode）](https://leetcode.cn/problems/er-jin-zhi-zhong-1de-ge-shu-lcof/)
@@ -8658,6 +8662,43 @@ public:
 
 
 
+## 剑指 Offer 29. 顺时针打印矩阵 [easy]
+
+[剑指 Offer 29. 顺时针打印矩阵 - 力扣（LeetCode）](https://leetcode.cn/problems/shun-shi-zhen-da-yin-ju-zhen-lcof/)
+
+**思路：**
+
+模拟遍历，设置上下左右四个边界，每遍历完一行或一列就缩小一圈边界，直至边界越界截至。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        vector<int> res;
+        if(matrix.empty()) return res;
+        int up = 0;
+        int down = matrix.size() - 1;
+        int left = 0;
+        int right = matrix[0].size() - 1;
+        while(1) {
+            for(int i = left; i <= right; i++) res.push_back(matrix[up][i]);
+            if(++up > down) break;
+            for(int i = up; i <= down; i++) res.push_back(matrix[i][right]);
+            if(--right < left) break;
+            for(int i = right; i >= left; i--) res.push_back(matrix[down][i]);
+            if(--down < up) break;
+            for(int i = down; i >= up; i--) res.push_back(matrix[i][left]);
+            if(++left > right) break;
+        }
+        return res;
+    }
+};
+```
+
+
+
 ## 剑指 Offer 30. 包含min函数的栈 [easy]
 
 [剑指 Offer 30. 包含min函数的栈 - 力扣（LeetCode）](https://leetcode.cn/problems/bao-han-minhan-shu-de-zhan-lcof/)
@@ -8708,6 +8749,36 @@ public:
  * int param_3 = obj->top();
  * int param_4 = obj->min();
  */
+```
+
+
+
+## 剑指 Offer 31. 栈的压入、弹出序列 [medium]
+
+[剑指 Offer 31. 栈的压入、弹出序列 - 力扣（LeetCode）](https://leetcode.cn/problems/zhan-de-ya-ru-dan-chu-xu-lie-lcof/)
+
+**思路：**
+
+用栈模拟一下就好了，先按照pushed数组一个一个入栈，再在poped数组维护一个指针，当发现栈顶元素与指针指向的数字相同，就pop一下，指针向后移一下。如果最终指针指向了数组最后面，就说明可以按照此方法pop
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {
+        stack<int> sta;
+        int cur = 0;
+        for(int num : pushed) {
+            sta.push(num);
+            while(cur < popped.size() && !sta.empty() && sta.top() == popped[cur]) {
+                sta.pop();
+                cur ++;
+            }
+        }
+        return cur == popped.size();
+    }
+};
 ```
 
 
@@ -9670,6 +9741,44 @@ public:
 
 
 
+## 剑指 Offer 57 - II. 和为s的连续正数序列 [easy]
+
+[剑指 Offer 57 - II. 和为s的连续正数序列 - 力扣（LeetCode）](https://leetcode.cn/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/)
+
+**思路：**
+
+设连续正整数序列的左边界 i 和右边界 j ，则可构建滑动窗口从左向右滑动。循环中，每轮判断滑动窗口内元素和与目标值 target 的大小关系，若相等则记录结果，若大于 target 则移动左边界 i （以减小窗口内的元素和），若小于 target 则移动右边界 j （以增大窗口内的元素和）。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> findContinuousSequence(int target) {
+        int i = 1, j = 2, s = 3; // 初始化
+        vector<vector<int>> res;
+        while(i < j) {
+            if(s == target) {
+                vector<int> ans;
+                for(int k = i; k <= j; k++)
+                    ans.push_back(k);
+                res.push_back(ans);
+            }
+            if(s >= target) { // 大于与等于都是左边界右移，故合并
+                s -= i;
+                i++;
+            } else {
+                j++;
+                s += j;
+            }
+        }
+        return res;
+    }
+};
+```
+
+
+
 ## [剑指 Offer 58 - I. 翻转单词顺序 [easy]](#151. 翻转字符串里的单词 [medium])
 
 
@@ -9705,6 +9814,31 @@ public:
             maxN = max(maxN, num);
         }
         return maxN - minN < 5;
+    }
+};
+```
+
+
+
+## 剑指 Offer 62. 圆圈中最后剩下的数字 [easy]
+
+[剑指 Offer 62. 圆圈中最后剩下的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi-lcof/)
+
+**思路：**
+
+约瑟夫环问题，[(215条消息) 约瑟夫环——公式法（递推公式）_约瑟夫公式_陈浅墨的博客-CSDN博客](https://blog.csdn.net/u011500062/article/details/72855826)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int lastRemaining(int n, int m) {
+        int res = 0;
+	    for(int i = 2; i <= n; i ++) {
+		    res = ( res + m ) % i;
+	    }
+	    return res;	
     }
 };
 ```
