@@ -8497,6 +8497,86 @@ public:
 
 
 
+## 剑指 Offer 20. 表示数值的字符串 [medium]
+
+[剑指 Offer 20. 表示数值的字符串 - 力扣（LeetCode）](https://leetcode.cn/problems/biao-shi-shu-zhi-de-zi-fu-chuan-lcof/)
+
+**思路：**
+
+没什么算法上的思路，就是要理清题中的各个条件，按位检查即可。
+
+**代码：**
+
+```c++
+class Solution {
+private:
+    // 整数的格式可以用[+|-]B表示, 其中B为无符号整数
+    bool scanInteger(const string s, int& index){
+
+        if(s[index] == '+' || s[index] == '-')
+            ++index;
+
+        return scanUnsignedInteger(s, index);
+    }
+    
+    bool scanUnsignedInteger(const string s, int& index){
+
+        int befor = index;
+        while(index != s.size() && s[index] >= '0' && s[index] <= '9')
+            index ++;
+
+        return index > befor;
+    }
+public:
+    // 数字的格式可以用A[.[B]][e|EC]或者.B[e|EC]表示，
+    // 其中A和C都是整数（可以有正负号，也可以没有），而B是一个无符号整数
+    bool isNumber(string s) {
+
+        if(s.size() == 0)
+            return false;
+        int index = 0;
+
+        //字符串开始有空格，可以返回true
+        while(s[index] == ' ')  //书中代码没有该项测试
+            ++index;
+
+        bool numeric = scanInteger(s, index);
+
+        // 如果出现'.'，接下来是数字的小数部分
+        if(s[index] == '.'){
+
+            ++index;
+
+            // 下面一行代码用||的原因：
+            // 1. 小数可以没有整数部分，例如.123等于0.123；
+            // 2. 小数点后面可以没有数字，例如233.等于233.0；
+            // 3. 当然小数点前面和后面可以有数字，例如233.666
+            numeric = scanUnsignedInteger(s, index) || numeric;
+        }
+
+        // 如果出现'e'或者'E'，接下来跟着的是数字的指数部分
+        if(s[index] == 'e' || s[index] == 'E'){
+
+            ++index;
+
+            // 下面一行代码用&&的原因：
+            // 1. 当e或E前面没有数字时，整个字符串不能表示数字，例如.e1、e1；
+            // 2. 当e或E后面没有整数时，整个字符串不能表示数字，例如12e、12e+5.4
+            numeric = numeric && scanInteger(s ,index);
+        }
+
+        //字符串结尾有空格，可以返回true
+        while(s[index] == ' ')
+            ++index;
+        cout << s.size() << " " << index;   //调试用
+
+        return numeric && index == s.size();
+    }
+};
+```
+
+
+
 ## 剑指 Offer 22. 链表中倒数第k个节点 [easy]
 
 [剑指 Offer 22. 链表中倒数第k个节点 - 力扣（LeetCode）](https://leetcode.cn/problems/lian-biao-zhong-dao-shu-di-kge-jie-dian-lcof/)
@@ -9787,6 +9867,61 @@ public:
 
 
 
+## [剑指 Offer 59 - I. 滑动窗口的最大值 [hard]](#239. 滑动窗口最大值 [hard])
+
+
+
+## 剑指 Offer 59 - II. 队列的最大值 [medium]
+
+[剑指 Offer 59 - II. 队列的最大值 - 力扣（LeetCode）](https://leetcode.cn/problems/dui-lie-de-zui-da-zhi-lcof/)
+
+**思路：**
+
+上一题数据结构的实现。
+
+**代码：**
+
+```c++
+class MaxQueue {
+public:
+    deque<int> maxque;
+    queue<int> que;
+    MaxQueue() {
+
+    }
+    
+    int max_value() {
+        return maxque.empty() ? -1 : maxque.front();
+    }
+    
+    void push_back(int value) {
+        while(!maxque.empty() && value > maxque.back()) {
+            maxque.pop_back();
+        }
+        maxque.push_back(value);
+        que.push(value);
+    }
+    
+    int pop_front() {
+        if (que.empty()) return -1;
+        int value = que.front();
+        if(value == maxque.front()) {
+            maxque.pop_front();
+        }
+        que.pop();
+        return value;
+    }
+};
+
+/**
+ * Your MaxQueue object will be instantiated and called as such:
+ * MaxQueue* obj = new MaxQueue();
+ * int param_1 = obj->max_value();
+ * obj->push_back(value);
+ * int param_3 = obj->pop_front();
+ */
+```
+
 
 
 ## 剑指 Offer 61. 扑克牌中的顺子 [easy]
@@ -9976,6 +10111,49 @@ public:
 ```
 
 
+
+## 剑指 Offer 67. 把字符串转换成整数 [medium]
+
+[剑指 Offer 67. 把字符串转换成整数 - 力扣（LeetCode）](https://leetcode.cn/problems/ba-zi-fu-chuan-zhuan-huan-cheng-zheng-shu-lcof/?envType=study-plan&id=lcof&plan=lcof&plan_progress=xxzaydft)
+
+**思路：**
+
+没什么好说的，数据校验，先检查空格和正负号，空格只能出现在最前面，正负号只能有一次。再检查数字。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int strToInt(std::string str) {
+        long num = 0;
+        int i = 0;
+        bool isNeg = false;
+        while(i < str.size()) {
+            if(str[i] == ' ') {
+                i ++;
+            } else break;
+        }
+        if (str[i] == '-' || str[i] == '+') {
+            isNeg = str[i] == '-';
+            i ++;
+        }
+
+        while(i < str.size()) {
+            if (str[i] < '0' || str[i] > '9') {
+                break;
+            } else {
+                num = num * 10 + str[i] - '0';
+                if(isNeg == false && num > INT_MAX) return INT_MAX;
+                else if(isNeg == true && -num < INT_MIN) return INT_MIN;
+                i++;
+            }
+        }
+        return isNeg ? -num : num;
+
+    }
+};
+```
 
 
 
