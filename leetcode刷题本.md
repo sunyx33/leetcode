@@ -8350,6 +8350,40 @@ public:
 
 
 
+## 剑指 Offer 14- II. 剪绳子 II [medium]
+
+[剑指 Offer 14- II. 剪绳子 II - 力扣（LeetCode）](https://leetcode.cn/problems/jian-sheng-zi-ii-lcof/)
+
+**思路：**
+
+c++会溢出，所以要取模。取模的话就不能用dp了，因为每次取max会变得无效。（1000000009 < 1000000006）
+
+这里用数学规律，就是把整数拆分成尽可能多的3相乘。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int cuttingRope(int n) {
+        if (n == 2) return 1;
+        if (n == 3) return 2;
+        if (n == 4) return 4;
+        long long res = 1;
+        while (n > 4) {
+            n -= 3;
+            res = res * 3 % 1000000007;
+        }
+        res = res * n % 1000000007;
+        return (int) res;
+    }
+};
+```
+
+
+
+
+
 ## 剑指 Offer 15. 二进制中1的个数 [easy]
 
 [剑指 Offer 15. 二进制中1的个数 - 力扣（LeetCode）](https://leetcode.cn/problems/er-jin-zhi-zhong-1de-ge-shu-lcof/)
@@ -8426,6 +8460,43 @@ public:
 
 
 
+## 剑指 Offer 17. 打印从1到最大的n位数 [easy]
+
+[剑指 Offer 17. 打印从1到最大的n位数 - 力扣（LeetCode）](https://leetcode.cn/problems/da-yin-cong-1dao-zui-da-de-nwei-shu-lcof/)
+
+**思路：**
+
+lc上的题不涉及数字溢出，所以太简单了无意义。
+
+本题实际上有隐藏的数字溢出问题，所以用字符串来模拟：
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> res;
+    vector<int> printNumbers(int n) {
+        for(int i = 1; i <= n; i++)
+            for(int j = 1; j <= 9; j++)
+                dfs(1, i, to_string(j)); //dfs从1开始，因为第0位已经确定了
+        return res;
+    }
+    void dfs(int k, int n, string s) // 我需要一个n位数，现在处理完了第k位，这k位数字是s
+    {
+        if(k==n)
+        {
+            res.emplace_back(stoi(s));
+            return;
+        }
+        for(int i = 0; i < 10; i++)
+            dfs(k+1, n, s+to_string(i));
+    }
+};
+```
+
+
+
 ## 剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 [easy]
 
 [剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 - 力扣（LeetCode）](https://leetcode.cn/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/)
@@ -8494,6 +8565,101 @@ public:
     }
 };
 ```
+
+
+
+## 剑指 Offer 19. 正则表达式匹配 [hard]
+
+[剑指 Offer 19. 正则表达式匹配 - 力扣（LeetCode）](https://leetcode.cn/problems/zheng-ze-biao-da-shi-pi-pei-lcof/)
+
+**思路：**
+
+1. dp数组以及下标的含义
+
+   dp\[i][j] 表示s[0, i - 1]与p[0, j - 1]是否可以匹配
+
+2. 确定递推公式
+
+   如果末尾可以匹配上：
+
+   ```c++
+   dp[i][j] = dp[i - 1][j - 1];
+   ```
+
+   如果末尾不能匹配上：
+
+   ```c++
+   // 1.当前p串的末尾是*
+   // a.*前一位与s串末尾匹配上
+   dp[i][j] = dp[i][j - 2] || dp[i - 1][j]; // *匹配0次的情况 || *匹配1次以上的情况 
+   
+   // b.*前一位与s串末尾匹配不上
+   dp[i][j] = dp[i][j - 2]; // *只能匹配0次
+   
+   // 2.当前p串末尾不是*, false, 不需要赋值 
+   ```
+
+3. dp数组如何初始化
+
+   ```c++
+   // dp[0][0]代表s与p均为空，可匹配
+   dp[0][0] = true;
+   // dp[i][0]代表s不空，p空，不匹配（初值为false，不用赋值）
+   // dp[0][j]代表s空，p不空，由于*可匹配0个字符，所以可能匹配
+   for(int j = 1; j <= p.size(); j++) {
+       if(p[j - 1] == '*') { // 这里j其实一定大于1，因为只有一个*的匹配串是不合法的
+           dp[0][j] = dp[0][j - 2];
+       }
+   }
+   ```
+
+4. 确定遍历顺序
+
+   从左到右，从上到下
+
+5. 举例推导dp数组
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        // dp[i][j] 表示s[0, i - 1]与p[0, j - 1]是否可以匹配
+        vector<vector<bool>> dp(s.size() + 1, vector<bool>(p.size() + 1, false));
+
+        // 初始化：
+        // dp[0][0]代表s与p均为空，可匹配
+        dp[0][0] = true;
+        // dp[i][0]代表s不空，p空，不匹配（初值为false，不用赋值）
+        // dp[0][j]代表s空，p不空，由于*可匹配0个字符，所以可能匹配
+        for(int j = 1; j <= p.size(); j++) {
+            if(p[j - 1] == '*') { // 这里j其实一定大于1，因为只有一个*的匹配串是不合法的
+                dp[0][j] = dp[0][j - 2];
+            }
+        }
+
+        // 填格子
+        for(int i = 1; i <= s.size(); i++) {
+            for(int j = 1; j <= p.size(); j++) {
+                if(s[i - 1] == p[j - 1] || p[j - 1] == '.') { // 如果末尾可以匹配上
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else if(p[j - 1] == '*') { // 模式串末尾是*
+                    if(s[i - 1] == p[j - 2] || p[j - 2] == '.') {
+                        dp[i][j] = dp[i][j - 2]  // *匹配0次的情况
+                                || dp[i - 1][j]; // *匹配1次以上的情况
+                    } else { // 模式串*前一个字符与s串末尾不匹配
+                        dp[i][j] = dp[i][j - 2]; // *只能匹配0次
+                    }
+                }
+            }
+        }
+        return dp[s.size()][p.size()];
+    }
+};
+```
+
+
 
 
 
@@ -9117,6 +9283,123 @@ private:
 
 
 
+## 剑指 Offer 37. 序列化二叉树 [hard]
+
+[剑指 Offer 37. 序列化二叉树 - 力扣（LeetCode）](https://leetcode.cn/problems/xu-lie-hua-er-cha-shu-lcof/)
+
+**思路：**
+
+因为有null的缘故，所以可以直接通过一种遍历顺序去反序列化二叉树。只需注意序列化与反序列化的遍历顺序相同即可。
+
+**代码：**
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Codec {
+public:
+    void rserialize(TreeNode* root, string& str) {
+        if (root == nullptr) {
+            str += "None,";
+        } else {
+            str += to_string(root->val) + ",";
+            rserialize(root->left, str);
+            rserialize(root->right, str);
+        }
+    }
+
+    string serialize(TreeNode* root) {
+        string ret;
+        rserialize(root, ret);
+        return ret;
+    }
+
+    TreeNode* rdeserialize(list<string>& dataArray) {
+        if (dataArray.front() == "None") {
+            dataArray.erase(dataArray.begin());
+            return nullptr;
+        }
+
+        TreeNode* root = new TreeNode(stoi(dataArray.front()));
+        dataArray.erase(dataArray.begin());
+        root->left = rdeserialize(dataArray);
+        root->right = rdeserialize(dataArray);
+        return root;
+    }
+
+    TreeNode* deserialize(string data) {
+        list<string> dataArray;
+        string str;
+        for (auto& ch : data) {
+            if (ch == ',') {
+                dataArray.push_back(str);
+                str.clear();
+            } else {
+                str.push_back(ch);
+            }
+        }
+        if (!str.empty()) {
+            dataArray.push_back(str);
+            str.clear();
+        }
+        return rdeserialize(dataArray);
+    }
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec;
+// codec.deserialize(codec.serialize(root));
+```
+
+
+
+## 剑指 Offer 38. 字符串的排列 [medium]
+
+**思路：**
+
+字符串版本的[47. 全排列II [medium]](#47. 全排列II [medium])
+
+**代码：**
+
+```c++
+class Solution {
+private:
+    string path;
+    vector<string> res;
+    void backtrcking(string s, vector<bool>& used) {
+        if(path.size() == s.size()) {
+            res.push_back(path);
+            return;
+        }
+        unordered_set<char> set;
+        for(int i = 0; i < s.size(); i++) {
+            if(used[i] == true || set.find(s[i]) != set.end()) continue;
+            path.push_back(s[i]);
+            set.emplace(s[i]);
+            used[i] = true;
+            backtrcking(s, used);
+            used[i] = false;
+            path.pop_back();
+        }
+    }
+public:
+    vector<string> permutation(string s) {
+        vector<bool> used(s.size(), false);
+        backtrcking(s, used);
+        return res;
+    }
+};
+```
+
+
+
 ## 剑指 Offer 39. 数组中出现次数超过一半的数字 [easy]
 
 [剑指 Offer 39. 数组中出现次数超过一半的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-zu-zhong-chu-xian-ci-shu-chao-guo-yi-ban-de-shu-zi-lcof/)
@@ -9533,6 +9816,41 @@ public:
             }
         }
         return result;
+    }
+};
+```
+
+
+
+## 剑指 Offer 49. 丑数 [medium]
+
+[剑指 Offer 49. 丑数 - 力扣（LeetCode）](https://leetcode.cn/problems/chou-shu-lcof/)
+
+**思路：**
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230426212004429.png)
+
+故维护abc三个指针指向$x_a$$x_b$$x_c$，每次用了哪个计算，就相应指针后移一位
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int nthUglyNumber(int n) {
+        int a = 0, b = 0, c = 0;
+        int dp[n];
+        dp[0] = 1;
+        for(int i = 1; i < n; i++) {
+            int n2 = dp[a] * 2;
+            int n3 = dp[b] * 3;
+            int n5 = dp[c] * 5;
+            dp[i] = min(n2, min(n3, n5));
+            if(dp[i] == n2) a++;
+            if(dp[i] == n3) b++;
+            if(dp[i] == n5) c++;
+        }
+        return dp[n - 1];
     }
 };
 ```
