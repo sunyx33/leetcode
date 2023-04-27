@@ -8497,34 +8497,6 @@ public:
 
 
 
-## 剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 [easy]
-
-[剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 - 力扣（LeetCode）](https://leetcode.cn/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/)
-
-**思路：**
-
-双指针，i指向从左看第一个偶数，j指向从又看第一个奇数，若此时i<j，则交换两个数。以此往复直至i>j为止。
-
-**代码：**
-
-```c++
-class Solution {
-public:
-    vector<int> exchange(vector<int>& nums) {
-        int i = 0;
-        int j = nums.size() - 1;
-        while (i < j) {
-            while (nums[i] % 2 == 1 && i < nums.size() - 1) i ++;
-            while (nums[j] % 2 == 0 && j > 0) j --;
-            if (i < j) swap(nums[i], nums[j]);
-        }
-        return nums;
-    }
-};
-```
-
-
-
 ## 剑指 Offer 18. 删除链表的节点 [easy]
 
 [剑指 Offer 18. 删除链表的节点 - 力扣（LeetCode）](https://leetcode.cn/problems/shan-chu-lian-biao-de-jie-dian-lcof/)
@@ -8740,6 +8712,36 @@ public:
     }
 };
 ```
+
+
+
+## 剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 [easy]
+
+[剑指 Offer 21. 调整数组顺序使奇数位于偶数前面 - 力扣（LeetCode）](https://leetcode.cn/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/)
+
+**思路：**
+
+双指针，i指向从左看第一个偶数，j指向从又看第一个奇数，若此时i<j，则交换两个数。以此往复直至i>j为止。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> exchange(vector<int>& nums) {
+        int i = 0;
+        int j = nums.size() - 1;
+        while (i < j) {
+            while (nums[i] % 2 == 1 && i < nums.size() - 1) i ++;
+            while (nums[j] % 2 == 0 && j > 0) j --;
+            if (i < j) swap(nums[i], nums[j]);
+        }
+        return nums;
+    }
+};
+```
+
+
 
 
 
@@ -9593,6 +9595,80 @@ public:
 
 
 
+## 剑指 Offer 43. 1～n 整数中 1 出现的次数 [hard]
+
+[剑指 Offer 43. 1～n 整数中 1 出现的次数 - 力扣（LeetCode）](https://leetcode.cn/problems/1nzheng-shu-zhong-1chu-xian-de-ci-shu-lcof/)
+
+**思路：**
+
+[面试题43. 1～n 整数中 1 出现的次数（清晰图解） - 1～n 整数中 1 出现的次数 - 力扣（LeetCode）](https://leetcode.cn/problems/1nzheng-shu-zhong-1chu-xian-de-ci-shu-lcof/solution/mian-shi-ti-43-1n-zheng-shu-zhong-1-chu-xian-de-2/)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int countDigitOne(int n) {
+        int res = 0;
+        long int digit = 1;
+        long int high = n / 10;
+        long int cur = n % 10;
+        long int low = 0;
+        while(high != 0 || cur != 0) {
+            if(cur == 0) res += high * digit;
+            else if(cur == 1) res += high * digit + low + 1;
+            else res += (high + 1) * digit;
+            low += cur * digit;
+            cur = high % 10;
+            high /= 10;
+            digit *= 10;
+        }
+        return res;
+    }
+};
+```
+
+
+
+## 剑指 Offer 44. 数字序列中某一位的数字 [medium]
+
+[剑指 Offer 44. 数字序列中某一位的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-zi-xu-lie-zhong-mou-yi-wei-de-shu-zi-lcof/)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int findNthDigit(int n) {
+        //当n=0不存在。  
+        //分段
+        //第一段（1-9）数字1-10 个，长度 9*1
+        //第二端（10-99）数字(100-10)个，长度（100-10）*2 = 90*2
+        //第三段（100-999）数字(1000-100)个, 长度（1000-100）*3 =900*3
+
+        //n=1，返回1 。n=10 对应第二段的第一个数字10。取第一位为1
+
+        int i=1;//分段 第1段开始 
+
+        while(n > 9*pow(10,i-1) *i)//找到n在第几段 ，如第二段有90*2 个字符
+        {
+            n = n - 9*pow(10,i-1) *i;
+            i++;
+        }
+        //到这里已经知道是第几段i。 且是这一段的第几个字符
+        
+        int min_num = pow(10, i - 1); // 这一段的最小值。比如第二段，最小为10
+        int cur_num = min_num + (n - 1) / i; // 知道是属于哪个数字 每个数字长度为i  第0数字是它本身
+        int cur_bit = (n - 1) % i; //看是这个数字的第几位，第0位为最高位，第1位为次高位。
+
+       string s = to_string(cur_num);
+       return   s[cur_bit] - '0';//返回这一位的数字
+    }
+};
+```
+
+
+
 ## 剑指 Offer 45. 把数组排成最小的数 [medium]
 
 [面试题45. 把数组排成最小的数 - 力扣（LeetCode）](https://leetcode.cn/problems/ba-shu-zu-pai-cheng-zui-xiao-de-shu-lcof/)
@@ -9881,6 +9957,47 @@ public:
         for(char c : s)
             if(dic[c]) return c;
         return ' ';
+    }
+};
+```
+
+
+
+## 剑指 Offer 51. 数组中的逆序对 [hard]
+
+[剑指 Offer 51. 数组中的逆序对 - 力扣（LeetCode）](https://leetcode.cn/problems/shu-zu-zhong-de-ni-xu-dui-lcof/)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int reversePairs(vector<int>& nums) {
+        vector<int> tmp(nums.size());
+        return mergeSort(0, nums.size() - 1, nums, tmp);
+    }
+private:
+    int mergeSort(int l, int r, vector<int>& nums, vector<int>& tmp) {
+        // 终止条件
+        if (l >= r) return 0;
+        // 递归划分
+        int m = (l + r) / 2;
+        int res = mergeSort(l, m, nums, tmp) + mergeSort(m + 1, r, nums, tmp);
+        // 合并阶段
+        int i = l, j = m + 1;
+        for (int k = l; k <= r; k++)
+            tmp[k] = nums[k];
+        for (int k = l; k <= r; k++) {
+            if (i == m + 1)
+                nums[k] = tmp[j++];
+            else if (j == r + 1 || tmp[i] <= tmp[j])
+                nums[k] = tmp[i++];
+            else {
+                nums[k] = tmp[j++];
+                res += m - i + 1; // 统计逆序对
+            }
+        }
+        return res;
     }
 };
 ```
@@ -10238,6 +10355,45 @@ public:
  * obj->push_back(value);
  * int param_3 = obj->pop_front();
  */
+```
+
+
+
+## 剑指 Offer 60. n个骰子的点数 [medium]
+
+[剑指 Offer 60. n个骰子的点数 - 力扣（LeetCode）](https://leetcode.cn/problems/nge-tou-zi-de-dian-shu-lcof/)
+
+**思路：**
+
+dp\[n][x]代表n个骰子投出x点数的概率，那么dp\[n][x]与dp\[n-1][x-1]到dp\[n-1][x-6]有关：
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230427122135487.png)
+
+但如此逆向递推的话会导致越界问题（如dp\[2][2]与dp\[1][-4]有关），所以我们考虑正向推：dp\[1][1]与dp\[2][2]到dp\[2][7]有关：
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230427122418444.png)
+
+如此遍历dp[1]，把有关的概率累加到dp[2]的相应位置即可。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<double> dicesProbability(int n) {
+        vector<double> dp(6, 1 / 6.0); // n = 1
+        for(int cnt = 2; cnt <= n; n++) {
+            vector<double> tmp(cnt * 5 + 1, 0);
+            for(int i = 0; i < tmp.size(); i++) {
+                for(int j = max(i - 7, 0); j < min(i - 1, 6 * (cnt - 1) - 1); j++) {
+                    tmp[i] += dp[j] / 6.0;
+                }
+            }
+            dp = tmp;
+        }
+        return dp;
+    }
+};
 ```
 
 
