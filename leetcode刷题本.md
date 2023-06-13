@@ -11152,3 +11152,273 @@ public:
 };
 ```
 
+
+
+## 560.和为-k-的子数组 [medium]
+
+[560. 和为 K 的子数组 - 力扣（LeetCode）](https://leetcode.cn/problems/subarray-sum-equals-k/comments/)
+
+**思路：**
+
+遍历数组nums，计算从第0个元素到当前元素的和，用哈希表保存出现过的累积和sum的次数。如果sum - k在哈希表中出现过，则代表从当前下标i往前有连续的子数组的和为k。
+
+时间复杂度：$O(n)$
+
+空间复杂度：$O(n)$
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int subarraySum(vector<int>& nums, int k) {
+        unordered_map<int, int> uMap;
+        uMap[0] = 1;
+        int sum = 0;
+        int result = 0;
+        for(int n : nums) {
+            sum += n;
+            if(uMap.find(sum - k) != uMap.end()) {
+                result += uMap[sum - k];
+            }
+            uMap[sum] ++; // 注意最后再更新map，不然处理不了k = 0的情况
+        }
+        return result;
+    }
+};
+```
+
+
+
+## 76.最小覆盖子串 [medium]
+
+**思路：**
+
+[简简单单，非常容易理解的滑动窗口思想 - 最小覆盖子串 - 力扣（LeetCode）](https://leetcode.cn/problems/minimum-window-substring/solution/tong-su-qie-xiang-xi-de-miao-shu-hua-dong-chuang-k/)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        vector<int> need(128,0);
+        int count = 0;  
+        for(char c : t)
+        {
+            need[c]++;
+        }
+        count = t.length();
+        int l=0, r=0, start=0, size = INT_MAX;
+        while(r<s.length())
+        {
+            char c = s[r];
+            if(need[c]>0)
+                count--;
+            need[c]--;  //先把右边的字符加入窗口
+            if(count==0)    //窗口中已经包含所需的全部字符
+            {
+                while(l<r && need[s[l]]<0) //缩减窗口
+                {
+                    need[s[l++]]++;
+                }   //此时窗口符合要求
+                if(r-l+1 < size)    //更新答案
+                {
+                    size = r-l+1;
+                    start = l;
+                }
+                need[s[l]]++;   //左边界右移之前需要释放need[s[l]]
+                l++;
+                count++;
+            }
+            r++;
+        }
+        return size==INT_MAX ? "" : s.substr(start, size);
+    }
+};
+```
+
+
+
+# 剑指offer Ⅱ
+
+## 剑指 Offer II 001. 整数除法 [easy]
+
+[剑指 Offer II 001. 整数除法 - 力扣（LeetCode）](https://leetcode.cn/problems/xoh6Oh/?envType=study-plan-v2&envId=coding-interviews-special)
+
+**思路：**
+
+快速除（类似于快速幂）
+
+举个例子：11 / 3
+
+1. 11 > 3，所以11 / 3的结果至少是1
+2. 11 > 3 * 2，所以11 / 3的结果至少是2
+3. 11 < 3 * 4，所以11 / 3的结果比4小，但可能比2大
+4. 计算(11 - 3 * 2) / 3的结果，加上2。到这里就有递归的思想了。
+
+时间复杂度：$O(n / m)$
+
+空间复杂度：$O(1)$
+
+空间复杂度：
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int divide(int a, int b) {
+        if(a == 0) return 0;
+        if(b == 1) return a;
+        if(b == -1) {
+            if(a > INT_MIN) return -a;
+            else return INT_MAX;
+        }
+        int sign = 1;
+        long aL = a;
+        long bL = b;
+        // 都搞成正数方便
+        if((aL > 0 && bL < 0) || (aL < 0 && bL > 0)) sign = -1;
+        if(aL < 0) aL = -aL;
+        if(bL < 0) bL = -bL;
+        
+        int res = fastDiv(aL, bL);
+        return sign == 1 ? res : -res; 
+    }
+
+    int fastDiv(long a, long b) {
+        if(a < b) return 0;
+        int cnt = 1;
+        long bCopy = b;
+        while(a > bCopy + bCopy) {
+            cnt += cnt;
+            bCopy += bCopy;
+        }
+        return cnt + fastDiv(a - bCopy, b); // 2 + (11 - 3 * 2) / 3
+    }
+};
+```
+
+
+
+## 剑指 Offer II 002. 二进制加法 [easy]
+
+[剑指 Offer II 002. 二进制加法 - 力扣（LeetCode）](https://leetcode.cn/problems/JFETK5/)
+
+**思路：**
+
+整体上还是模拟，从低位开始，记录每一位的结果以及进位，往后加。
+
+记住，二进制无进位加法结果为 a ^ b（异或）
+
+时间复杂度：$O(n)$
+
+空间复杂度：$O(n)$
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int add(int a, int b, int& carry) {
+        int result = a ^ b ^ carry;
+        int cnt = (a == 1) + (b == 1) + (carry == 1);
+        if(cnt >= 2) carry = 1;
+        else carry = 0;
+        return result;
+    }
+
+    string stack2str(stack<char>& sta) {
+        string res = "";
+        while(!sta.empty()) {
+            res += sta.top();
+            sta.pop();
+        }
+        return res;
+    }
+
+    string addBinary(string a, string b) {
+        stack<char> result;
+        if(b.size() > a.size()) swap(a, b);
+        int carry = 0;
+        int aPtr = a.size() - 1;
+        int bPtr = b.size() - 1;
+        while(aPtr >= 0 && bPtr >= 0) {
+            result.push(add(a[aPtr] - '0', b[bPtr] - '0', carry) + '0');
+            aPtr --;
+            bPtr --;
+        }
+        while(aPtr >= 0 || carry) {
+            if(aPtr >= 0) {
+                result.push(add(a[aPtr] - '0', 0, carry) + '0');
+                aPtr --;
+            } else {
+                carry = 0;
+                result.push('1');
+            }
+        }
+        return stack2str(result);
+    }
+};
+```
+
+
+
+## 剑指 Offer II 003. 前 n 个数字二进制中 1 的个数 [easy]
+
+[剑指 Offer II 003. 前 n 个数字二进制中 1 的个数 - 力扣（LeetCode）](https://leetcode.cn/problems/w3tCBm/)
+
+**思路：**
+
+如果i是奇数，那么1的个数为左移一位（i / 2）的个数 + 1。
+
+如果i是偶数，那么1的个数为左移一位（i / 2）的个数。
+
+动规思想。
+
+时间复杂度：$O(n)$
+
+空间复杂度：$O(1)$
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> countBits(int n) {
+        vector<int> result(n + 1, 0);
+        for(int i = 1; i <= n; i ++) {
+            if(i & 1) result[i] = 1 + result[i >> 1];
+            else result[i] = result[i >> 1];
+        }
+        return result;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 004. 只出现一次的数字  [easy]
+
+[剑指 Offer II 004. 只出现一次的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/WGki4K/?envType=study-plan-v2&envId=coding-interviews-special)
+
+**思路：**
+
+[只出现一次的数字 - 只出现一次的数字 - 力扣（LeetCode）](https://leetcode.cn/problems/WGki4K/solution/zhi-chu-xian-yi-ci-de-shu-zi-by-leetcode-0vrt/)
+
+**代码：**
+
+```C++
+class Solution {
+public:
+    int singleNumber(vector<int>& nums) {
+        int a = 0, b = 0;
+        for (int num: nums) {
+            tie(a, b) = pair{(~a & b & num) | (a & ~b & ~num), ~a & (b ^ num)};
+        }
+        return b;
+    }
+};
+```
+
