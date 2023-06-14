@@ -11422,3 +11422,190 @@ public:
 };
 ```
 
+
+
+## 剑指 Offer II 005. 单词长度的最大乘积 [medium]
+
+[剑指 Offer II 005. 单词长度的最大乘积 - 力扣（LeetCode）](https://leetcode.cn/problems/aseY1I/submissions/)
+
+**思路：**
+
+如何表示一个单词拥有什么字母？因为单词中都是小写字母，一共有26个，所以可以用一个int以位图的形式表示：
+
+a -> 0001，b -> 0010，c -> 0100，d -> 1000
+
+所以，遍历一个单词中的所有字母，每次 |= 1 << (c - 'a')即可。
+
+至于找到最大乘积，没有想到更好的办法，只能暴力。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int maxProduct(vector<string>& words) {
+        vector<int> hash(words.size(), 0);
+        for(int i = 0; i < words.size(); i++) {
+            for(char c : words[i]) {
+                hash[i] |= 1 << (c - 'a');
+            }
+        }
+
+        int maxResult = 0;
+        for(int i = 0; i < words.size(); i++) {
+            for(int j = i + 1; j < words.size(); j++) {
+                if((hash[i] & hash[j]) == 0) {
+                    int result = words[i].size() * words[j].size();
+                    maxResult = max(result, maxResult);
+                }
+            }
+        }
+        return maxResult;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 006. 排序数组中两个数字之和 [easy]
+
+[剑指 Offer II 006. 排序数组中两个数字之和 - 力扣（LeetCode）](https://leetcode.cn/problems/kLl5u1/)
+
+**思路**
+
+不让用map，俺只能想到暴力解惹...
+
+可以剪枝，就如果当前和前一个一样大，就跳过。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& numbers, int target) {
+        vector<int> result(2);
+        for(int i = 0; i < numbers.size(); i++) {
+            if(i > 0 && numbers[i] == numbers[i - 1]) continue; // 剪枝
+            for(int j = i + 1; j < numbers.size(); j++) {
+                if(j > i + 1 && numbers[j] == numbers[j - 1]) continue; // 剪枝
+                if(numbers[i] + numbers[j] < target) continue;
+                else if(numbers[i] + numbers[j] > target) break;
+                else {
+                    result[0] = i;
+                    result[1] = j;
+                    return result;
+                }
+            }
+        }
+        return result;
+    }
+};
+```
+
+
+
+## [剑指 Offer II 007. 数组中和为 0 的三个数 [medium]](#15. 三数之和 [medium])
+
+
+
+## [剑指 Offer II 008. 和大于等于 target 的最短子数组 [medium]](#209. 长度最小的子数组 [medium])
+
+
+
+## 剑指 Offer II 009. 乘积小于 K 的子数组 [medium]
+
+[剑指 Offer II 009. 乘积小于 K 的子数组 - 力扣（LeetCode）](https://leetcode.cn/problems/ZVAVXX/)
+
+**思路：**
+
+每找到一个成绩小于k的区间，表明该区间的所有子集都符合条件，但为了去重，只算上包括区间最后一个数的子集，其数量 = 区间长度。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int numSubarrayProductLessThanK(vector<int>& nums, int k) {
+        int left = 0;
+        int mul = 1;
+        int result = 0;
+        for(int right = 0; right < nums.size(); right ++) {
+            mul *= nums[right];
+            while(mul >= k) {
+                mul /= nums[left ++];
+                if(left > right) break;
+            }
+            if(mul < k) result += right - left + 1;
+        }
+        return result;
+    }
+};
+```
+
+
+
+## [剑指 Offer II 010. 和为 k 的子数组 [medium]](#560.和为-k-的子数组 [medium])
+
+
+
+## 剑指 Offer II 011. 0 和 1 个数相同的子数组 [medium]
+
+[剑指 Offer II 011. 0 和 1 个数相同的子数组 - 力扣（LeetCode）](https://leetcode.cn/problems/A1NYOS/)
+
+**思路：**
+
+将0换成-1，则题目与上题相似，变成了寻找和为0的子数组。只不过，上题寻找多少个，这题寻找最长。寻找最长的话，倘若前面有多个sum - k，则取最左边的一个。这里是通过发现已经有sum - k在map里，就不更新它的值做到的。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int findMaxLength(vector<int>& nums) {
+        int result = 0;
+        int sum = 0;
+        unordered_map<int, int> uMap;
+        uMap[0] = -1;
+        for(int i = 0; i < nums.size(); i++) {
+            if(nums[i] == 0) sum += -1;
+            else sum += 1;
+            if(uMap.find(sum) != uMap.end()) {
+                result = max(result, i - uMap[sum]);
+                continue; // 保持sum - k为最左边的一个。
+            }
+            uMap[sum] = i;
+        }
+        return result;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 012. 左右两边子数组的和相等 [medium]
+
+[剑指 Offer II 012. 左右两边子数组的和相等 - 力扣（LeetCode）](https://leetcode.cn/problems/tvdfij/)
+
+**思路：**
+
+简单题，朴素的思想：左边和等于右边和，先遍历数组算出总和，再遍历一遍数组寻找使得两边相等的分割点。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int pivotIndex(vector<int>& nums) {
+        int rightSum = 0;
+        for(int n : nums) rightSum += n;
+        int leftSum = 0;
+        for(int i = 0; i < nums.size(); i++){
+            if(i > 0) leftSum += nums[i - 1];
+            rightSum -= nums[i];
+            if(leftSum == rightSum) return i;
+        }
+        return -1;
+    }
+};
+```
+
