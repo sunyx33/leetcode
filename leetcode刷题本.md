@@ -11768,3 +11768,91 @@ public:
     }
 };
 ```
+
+
+
+## [剑指 Offer II 017. 含有所有字符的最短字符串 [hard]](#76.最小覆盖子串 [medium])
+
+
+
+## 剑指 Offer II 018. 有效的回文 [easy]
+
+[剑指 Offer II 018. 有效的回文 - 力扣（LeetCode）](https://leetcode.cn/problems/XltzEq/?envType=study-plan-v2&envId=coding-interviews-special)
+
+**思路：**
+
+快慢指针删除元素，双指针判断回文。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool isLetter(char& c) {
+        if('A' <= c && 'Z' >= c) {
+            c += 32;
+            return true;
+        } else if(('0' <= c && '9' >= c) || ('a' <= c && 'z' >= c)) return true;
+        return false;
+    }
+
+    bool isPalindrome(string s) {
+        int slow = 0;
+        int fast = 0;
+        for(; fast < s.size(); fast ++) {
+            if(isLetter(s[fast])) {
+                s[slow++] = s[fast];
+            }
+        }
+        fast = slow - 1;
+        slow = 0;
+        while(slow < fast) {
+            if(s[slow++] != s[fast--]) return false;
+        }
+        return true;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 019. 最多删除一个字符得到回文 [easy]
+
+[剑指 Offer II 019. 最多删除一个字符得到回文 - 力扣（LeetCode）](https://leetcode.cn/problems/RQku0D/)
+
+**思路：**
+
+仅有一次删除机会，左右指针，当第一次发现不一样时，看看[l + 1, r]或者[l, r - 1]是否是回文串，不是就返回false
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool judge(const string& s, int left, int right) {
+        while(left < right) {
+            if(s[left] != s[right]) return false;
+            left ++;
+            right --;
+        }
+        return true;
+    }
+
+    bool validPalindrome(string s) {
+        int left = 0;
+        int right = s.size() - 1;
+        while(right > left) {
+            if(s[left] != s[right]) {
+                return judge(s, left + 1, right) || judge(s, left, right - 1);
+            }
+            left ++;
+            right --;
+        }
+        return true;
+    }
+};
+```
+
+
+
+## [剑指 Offer II 020. 回文子字符串的个数 [medium]](#647. 回文子串 [medium])
