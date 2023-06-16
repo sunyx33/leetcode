@@ -1,10 +1,3 @@
-/*
- * @lc app=leetcode.cn id=3 lang=cpp
- *
- * [3] 无重复字符的最长子串
- */
-
-// @lc code=start
 class Solution {
 public:
     int lengthOfLongestSubstring(string s) {
@@ -19,18 +12,16 @@ public:
                 umap.emplace(s[i], i);
                 count ++;
                 if(count > result) result = count;
-            } else if (umap[s[i]] < start) {
-                umap[s[i]] = i;
+            } else if (umap[s[i]] < start) { // 有重复，但重复的字符在左边界之前
+                umap[s[i]] = i; // 更新重复字符的索引，继续右移右边界
                 count ++;
                 if(count > result) result = count;
-            } else {
-                start = umap[s[i]] + 1;
-                count = i - start + 1;
+            } else { // 有重复，重复的字符在左边界之后
+                start = umap[s[i]] + 1; // 左边界移到重复的下一个
+                count = i - start + 1; 
                 umap[s[i]] = i;
             }
         }
         return result;
     }
 };
-// @lc code=end
-

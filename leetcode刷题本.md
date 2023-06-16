@@ -11582,7 +11582,7 @@ public:
 
 
 
-## 剑指 Offer II 012. 左右两边子数组的和相等 [medium]
+## 剑指 Offer II 012. 左右两边子数组的和相等 [easy]
 
 [剑指 Offer II 012. 左右两边子数组的和相等 - 力扣（LeetCode）](https://leetcode.cn/problems/tvdfij/)
 
@@ -11609,3 +11609,162 @@ public:
 };
 ```
 
+
+
+## 剑指 Offer II 013. 二维子矩阵的和 [medium]
+
+[剑指 Offer II 013. 二维子矩阵的和 - 力扣（LeetCode）](https://leetcode.cn/problems/O4NDxx/)
+
+**思路：**
+
+动规思想，类内新数组matrix\[m][n]存放的是从[0, 0]到[m, n]的累积和，也就是上方格子 + 左方格子 - 左上方格子 + 自身格子。
+
+为了普适性，给新数组左边和上边都加一列、一行0。
+
+所以，要算[r1, c1] ~ [r2, c2]的累积和，只需：
+
+```c++
+m_matrix[row2][col2] - m_matrix[row2][col1 - 1] - m_matrix[row1 - 1][col2] + m_matrix[row1 - 1][col1 - 1];
+```
+
+**代码：**
+
+```c++
+class NumMatrix {
+public:
+    NumMatrix(vector<vector<int>>& matrix) {
+        m_matrix = vector<vector<int>>(matrix.size() + 1, vector<int>(matrix[0].size() + 1, 0));
+        for(int row = 1; row < m_matrix.size(); row ++) {
+            for(int col = 1; col < m_matrix[0].size(); col ++){
+                m_matrix[row][col] = m_matrix[row - 1][col] + m_matrix[row][col - 1] - m_matrix[row - 1][col - 1] + matrix[row - 1][col - 1];
+            }
+        }
+    }
+    
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        row1 ++;
+        col1 ++;
+        row2 ++;
+        col2 ++;
+        int result = m_matrix[row2][col2] - m_matrix[row2][col1 - 1] - m_matrix[row1 - 1][col2] + m_matrix[row1 - 1][col1 - 1];
+        return result;
+    }
+private:
+vector<vector<int>> m_matrix;
+};
+```
+
+
+
+## 剑指 Offer II 014. 字符串中的变位词 [medium]
+
+[剑指 Offer II 014. 字符串中的变位词 - 力扣（LeetCode）](https://leetcode.cn/problems/MPnaiL/)
+
+**思路：**
+
+用一个s1.size()大小的窗口去滑动s2，用长为26的数组统计窗口内字母出现的频率，比较窗口的频率与s1串的频率。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool checkInclusion(string s1, string s2) {
+        if(s1.size() > s2.size()) return false;
+        vector<int> hashmap1(26, 0);
+        vector<int> hashmap2(26, 0);
+        for(int i = 0; i < s1.size(); i++) {
+            hashmap1[s1[i] - 'a'] ++;
+            hashmap2[s2[i] - 'a'] ++;
+        }
+
+        for(int i = s1.size(); i < s2.size(); i++) {
+            if(hashmap1 == hashmap2) return true;
+            hashmap2[s2[i] - 'a'] ++;
+            hashmap2[s2[i - s1.size()] - 'a'] --;
+        }
+        return hashmap1 == hashmap2;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 015. 字符串中的所有变位词 [medium]
+
+[剑指 Offer II 015. 字符串中的所有变位词 - 力扣（LeetCode）](https://leetcode.cn/problems/VabMRr/)
+
+**思路：**
+
+和上道题基本一样，以后遇到异位词，就想到用一个长为26的数组记录字母出现的频率。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        vector<int> result;
+        if(p.size() > s.size()) return result;
+        vector<int> hashmap_s(26, 0);
+        vector<int> hashmap_p(26, 0);
+        for(int i = 0; i < p.size(); i++) {
+            hashmap_p[p[i] - 'a'] ++;
+            hashmap_s[s[i] - 'a'] ++;
+        } 
+        for(int i = p.size(); i < s.size(); i++) {
+            if(hashmap_p == hashmap_s) result.push_back(i - p.size());
+            hashmap_s[s[i] - 'a'] ++;
+            hashmap_s[s[i - p.size()] - 'a'] --;
+        }
+        if(hashmap_p == hashmap_s) result.push_back(s.size() - p.size());
+        return result;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 016. 不含重复字符的最长子字符串 [medium]
+
+[剑指 Offer II 016. 不含重复字符的最长子字符串 - 力扣（LeetCode）](https://leetcode.cn/problems/wtcaE1/)
+
+**思路：**
+
+用map<char, int>记录字符与其对应的索引。
+
+滑动窗口，左边界从起点开始，判断滑进的字符在不在map中，在的话进一步判断该字符的索引是否在左边界之左，在左边的话无影响，但要更新该字符的索引；在左边界之右的话，就要右移左边界到重复字符的下一个。
+
+每次计算窗口长度，选择最大的一次。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        if(s.size() == 0) return 0;
+        unordered_map<char, int> umap;
+        int result = 1;
+        int count = 1;
+        int start = 0;
+        umap.emplace(s[0], 0);
+        for(int i = 1; i < s.size(); i++) {
+            if (umap.find(s[i]) == umap.end()) {
+                umap.emplace(s[i], i);
+                count ++;
+                if(count > result) result = count;
+            } else if (umap[s[i]] < start) { // 有重复，但重复的字符在左边界之前
+                umap[s[i]] = i; // 更新重复字符的索引，继续右移右边界
+                count ++;
+                if(count > result) result = count;
+            } else { // 有重复，重复的字符在左边界之后
+                start = umap[s[i]] + 1; // 左边界移到重复的下一个
+                count = i - start + 1; 
+                umap[s[i]] = i;
+            }
+        }
+        return result;
+    }
+};
+```
