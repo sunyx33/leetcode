@@ -12205,3 +12205,177 @@ public:
 };
 ```
 
+
+
+## 剑指 Offer II 030. 插入、删除和随机访问都是 O(1) 的容器 [medium]
+
+[剑指 Offer II 030. 插入、删除和随机访问都是 O(1) 的容器 - 力扣（LeetCode）](https://leetcode.cn/problems/FortPu/)
+
+**思路：**
+
+要求时间复杂度o(1)，插入删除用map就行，关键是如何O(1)地随机取数？
+
+随机取数，就得有随机迭代器，STL中支持随机迭代器的有：vector，string，deque，显然他们的增删都不是o(1)
+
+那怎么办捏？两个都用不就完了！map<int, int>记录每个数字的索引，插入时，vec尾插，map插入<val, vec.size() - 1>；删除时：将待删除的val与vec尾部的数字交换，vec尾删，map删除；随机取数就只在vec中，通过随机下标取。
+
+> 要取得 [a,b) 的随机整数，使用 (rand() % (b-a))+ a;
+>
+> 要取得 [a,b] 的随机整数，使用 (rand() % (b-a+1))+ a;
+>
+> 要取得 (a,b] 的随机整数，使用 (rand() % (b-a))+ a + 1;
+
+**代码：**
+
+```c++
+class RandomizedSet {
+public:
+    RandomizedSet() {
+
+    }
+    
+    bool insert(int val) {
+        if(_map.find(val) != _map.end()) return false;
+        _vec.push_back(val);
+        _map.emplace(val, _vec.size() - 1);
+        return true;
+    }
+    
+    bool remove(int val) {
+        if(_map.find(val) == _map.end()) return false;
+        _map[_vec.back()] = _map[val];
+        swap(_vec.back(), _vec[_map[val]]);
+        _map.erase(val);
+        _vec.pop_back();
+        return true;
+    }
+    
+    int getRandom() {
+        int pos = (rand() % _vec.size());
+        return _vec[pos];
+    }
+private:
+    unordered_map<int, int> _map;
+    vector<int> _vec;
+};
+
+/**
+ * Your RandomizedSet object will be instantiated and called as such:
+ * RandomizedSet* obj = new RandomizedSet();
+ * bool param_1 = obj->insert(val);
+ * bool param_2 = obj->remove(val);
+ * int param_3 = obj->getRandom();
+ */
+```
+
+
+
+## 剑指 Offer II 031. 最近最少使用缓存 [medium] 
+
+[剑指 Offer II 031. 最近最少使用缓存 - 力扣（LeetCode）](https://leetcode.cn/problems/OrIXps/?envType=study-plan-v2&envId=coding-interviews-special)
+
+**思路：**
+
+LRU 缓存机制可以通过哈希表辅以双向链表实现，我们用一个哈希表和一个双向链表维护所有在缓存中的键值对。
+
+双向链表按照被使用的顺序存储了这些键值对，靠近尾部的键值对是最近使用的，而靠近头部的键值对是最久未使用的。
+
+哈希表即为普通的哈希映射（HashMap），通过缓存数据的键映射到其在双向链表中的位置。
+
+**代码：**
+
+```c++
+struct DLinkedNode {
+    int key, value;
+    DLinkedNode* prev;
+    DLinkedNode* next;
+    DLinkedNode(): key(0), value(0), prev(nullptr), next(nullptr) {}
+    DLinkedNode(int _key, int _value): key(_key), value(_value), prev(nullptr), next(nullptr) {}
+};
+
+class LRUCache {
+private:
+    unordered_map<int, DLinkedNode*> cache;
+    DLinkedNode* head;
+    DLinkedNode* tail;
+    int size;
+    int capacity;
+
+public:
+    LRUCache(int _capacity): capacity(_capacity), size(0) {
+        // 使用伪头部和伪尾部节点
+        head = new DLinkedNode();
+        tail = new DLinkedNode();
+        head->next = tail;
+        tail->prev = head;
+    }
+    
+    int get(int key) {
+        if (!cache.count(key)) {
+            return -1;
+        }
+        // 如果 key 存在，先通过哈希表定位，再移到头部
+        DLinkedNode* node = cache[key];
+        moveToHead(node);
+        return node->value;
+    }
+    
+    void put(int key, int value) {
+        if (!cache.count(key)) {
+            // 如果 key 不存在，创建一个新的节点
+            DLinkedNode* node = new DLinkedNode(key, value);
+            // 添加进哈希表
+            cache[key] = node;
+            // 添加至双向链表的头部
+            addToHead(node);
+            ++size;
+            if (size > capacity) {
+                // 如果超出容量，删除双向链表的尾部节点
+                DLinkedNode* removed = removeTail();
+                // 删除哈希表中对应的项
+                cache.erase(removed->key);
+                // 防止内存泄漏
+                delete removed;
+                --size;
+            }
+        }
+        else {
+            // 如果 key 存在，先通过哈希表定位，再修改 value，并移到头部
+            DLinkedNode* node = cache[key];
+            node->value = value;
+            moveToHead(node);
+        }
+    }
+
+    void addToHead(DLinkedNode* node) {
+        node->prev = head;
+        node->next = head->next;
+        head->next->prev = node;
+        head->next = node;
+    }
+    
+    void removeNode(DLinkedNode* node) {
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+    }
+
+    void moveToHead(DLinkedNode* node) {
+        removeNode(node);
+        addToHead(node);
+    }
+
+    DLinkedNode* removeTail() {
+        DLinkedNode* node = tail->prev;
+        removeNode(node);
+        return node;
+    }
+};
+```
+
+
+
+## [剑指 Offer II 032. 有效的变位词 [easy]](#242. 有效的字母异位词 [easy])
+
+
+
+## [剑指 Offer II 033. 变位词组 [medium]](#49. 字母异位词分组 [medium])
