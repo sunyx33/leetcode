@@ -728,7 +728,7 @@ public:
 
 其次，如何确定环的入口？
 
-假设从头结点到环形入口节点 的节点数为x。 环形入口节点到 fast指针与slow指针相遇节点 节点数为y。 从相遇节点 再到环形入口节点节点数为 z。 如图所示：
+假设从头结点到环形入口节点 的节点数为x。 环形入口节点到 fast指针与slow指针相遇节点 的节点数为y。 从相遇节点 再到环形入口节点节点数为 z。 如图所示：
 
 ![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/20220925103433.png)
 
@@ -11856,3 +11856,352 @@ public:
 
 
 ## [剑指 Offer II 020. 回文子字符串的个数 [medium]](#647. 回文子串 [medium])
+
+
+
+## [剑指 Offer II 021. 删除链表的倒数第 n 个结点 [medium]](#19. 删除链表的倒数第N个节点 [medium])
+
+
+
+## [剑指 Offer II 022. 链表中环的入口节点 [medium]](#142. 环形链表Ⅱ [medium])
+
+
+
+## [剑指 Offer II 023. 两个链表的第一个重合节点 [easy]](#160. 相交链表 [easy])
+
+
+
+## [剑指 Offer II 024. 反转链表 [easy]](#206. 翻转链表 [easy]) 
+
+
+
+## 剑指 Offer II 025. 链表中的两数相加 [medium]
+
+[剑指 Offer II 025. 链表中的两数相加 - 力扣（LeetCode）](https://leetcode.cn/problems/lMSNwu/)
+
+**思路：**
+
+就是模拟加法运算，先反转链表让个位数作为头节点，然后一路加下去。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    ListNode* reverse(ListNode* head) {
+        ListNode* pre = nullptr;
+        ListNode* cur = head;
+        while(head) {
+            ListNode* next = head->next;
+            head->next = pre;
+            pre = head;
+            head = next;
+        }
+        return pre;
+    }
+
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        l1 = reverse(l1);
+        l2 = reverse(l2);
+        int carry = 0;
+        ListNode* next = nullptr;
+        while(l1 || l2 || carry) {
+            int sum = carry;
+            if(l1) sum += l1->val;
+            if(l2) sum += l2->val;
+            ListNode* node = new ListNode(sum % 10, next);
+            carry = sum / 10;
+            next = node;
+            if(l1) l1 = l1->next;
+            if(l2) l2 = l2->next;
+        }
+        return next;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 026. 重排链表 [medium]
+
+[剑指 Offer II 026. 重排链表 - 力扣（LeetCode）](https://leetcode.cn/problems/LGjMqU/)
+
+**思路**
+
+第一种思路是把链表分成两部分，后半部分翻转，再插入前半部分。这种方法没有用到额外空间。
+
+第二种思路是用数组存放链表，这样链表就具备了随机访问的能力，就可以随意地修改next指针指向了。
+
+**代码：**
+
+```c++
+// 第一种方法
+class Solution {
+public:
+    void reorderList(ListNode* head) {
+        if (head == nullptr) {
+            return;
+        }
+        ListNode* mid = middleNode(head);
+        ListNode* l1 = head;
+        ListNode* l2 = mid->next;
+        mid->next = nullptr;
+        l2 = reverseList(l2);
+        mergeList(l1, l2);
+    }
+
+    ListNode* middleNode(ListNode* head) {
+        ListNode* slow = head;
+        ListNode* fast = head;
+        while (fast->next != nullptr && fast->next->next != nullptr) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+        return slow;
+    }
+
+    ListNode* reverseList(ListNode* head) {
+        ListNode* prev = nullptr;
+        ListNode* curr = head;
+        while (curr != nullptr) {
+            ListNode* nextTemp = curr->next;
+            curr->next = prev;
+            prev = curr;
+            curr = nextTemp;
+        }
+        return prev;
+    }
+
+    void mergeList(ListNode* l1, ListNode* l2) {
+        ListNode* l1_tmp;
+        ListNode* l2_tmp;
+        while (l1 != nullptr && l2 != nullptr) {
+            l1_tmp = l1->next;
+            l2_tmp = l2->next;
+
+            l1->next = l2;
+            l1 = l1_tmp;
+
+            l2->next = l1;
+            l2 = l2_tmp;
+        }
+    }
+};
+```
+
+```c++
+// 第二种方法
+class Solution {
+public:
+        void reorderList(ListNode* head) {
+            if (!head) return;
+            vector<ListNode*> vec;
+            ListNode* cur = head;
+
+            while (cur) {
+                vec.push_back(cur);
+                cur = cur->next;
+            }
+
+            int left = 0;
+            int right = vec.size() - 1;
+            while (left < right) {
+                vec[left]->next = vec[right];
+                vec[right--]->next = vec[++left];
+            }
+            vec[left]->next = nullptr;
+        }
+};
+```
+
+
+
+## 剑指 Offer II 027. 回文链表 [medium]
+
+[剑指 Offer II 027. 回文链表 - 力扣（LeetCode）](https://leetcode.cn/problems/aMhZSa/?envType=study-plan-v2&envId=coding-interviews-special)
+
+**思路：**
+
+腾讯面试题哈，当时想的是用数组存链表数据，判断回文数组，这样用到线性额外空间。
+
+还有一种办法不用额外空间：找到中间结点，将后半链表反转，再一个一个比。
+
+如何找到中间节点：数多长再除以2？太笨了，快慢指针，慢指针每次走一步，快指针每次走两步，则快指针到头时慢指针就是中间结点。
+
+**代码：**
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    bool isPalindrome(ListNode* head) {
+        if(!head) return true;
+        ListNode* firstEnd = findFirstEnd(head);
+        ListNode* secEnd = reverse(firstEnd->next);
+        ListNode* cur1 = head;
+        ListNode* cur2 = secEnd;
+        bool result = true;
+        while(cur1 && cur2) {
+            if(cur1->val != cur2->val) return false;
+            cur1 = cur1->next;
+            cur2 = cur2->next;
+        }
+        return result;
+    }
+
+    ListNode* reverse(ListNode* head) {
+        ListNode* pre = nullptr;
+        ListNode* cur = head;
+        while(cur) {
+            ListNode* tmpNext = cur->next;
+            cur->next = pre;
+            pre = cur;
+            cur = tmpNext;
+        }
+        return pre;
+    }
+
+    ListNode* findFirstEnd(ListNode* head) {
+        ListNode* slow = head;
+        ListNode* fast = head;
+        while(fast->next && fast->next->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+        return slow;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 028. 展平多级双向链表 [medium]
+
+[剑指 Offer II 028. 展平多级双向链表 - 力扣（LeetCode）](https://leetcode.cn/problems/Qv1Da2/)
+
+**思路：**
+
+看题解说，头向左歪45度，这玩意就是个二叉树，dfs。
+
+有道理，但没细想，可能我的办法本质也差不多吧。
+
+我就是很简单的，遇到有child的结点，cur->next = child, child->prev = cur。那child链表如何与cur->next相接？记录原先的cur->next到下层递归，在下层完成尾部的拼接。
+
+所以需要多传一个参，故重载函数。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    Node* flatten(Node* head, Node* next) {
+        Node* cur = head;
+        while(cur) {
+            if(cur->child) {
+                Node* next = cur->next;
+                Node* child = flatten(cur->child, next);
+                cur->next = child;
+                child->prev = cur;
+                cur->child = nullptr;
+            }
+            if(!cur->next) { // 与父链表的next相接，注意next可能为空
+                cur->next = next;
+                if(next) next->prev = cur;
+                break;
+            }
+            cur = cur->next;
+        }
+        return head;
+    }
+
+    Node* flatten(Node* head) {
+        Node* cur = head;
+        while(cur) {
+            if(cur->child) {
+                Node* next = cur->next;
+                Node* child = flatten(cur->child, next);
+                cur->next = child;
+                child->prev = cur;
+                cur->child = nullptr;
+            }
+            cur = cur->next;
+        }
+        return head;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 029. 排序的循环链表 [medium]
+
+[剑指 Offer II 029. 排序的循环链表 - 力扣（LeetCode）](https://leetcode.cn/problems/4ueAj6/)
+
+**思路：**
+
+1. 若链表为空，则直接创建节点，自己的next指向到自己；
+2. 若链表只有1个节点，则该放在该节点的后面即可；（其实这个可以去掉，在第3、4步骤里也可以处理）；
+3. 循环查找插入的位置，若大于等于当前节点的值，且小于等于下一个节点的值，则插入，然后返回；插入的位置没有区别，我们找到第一个符合条件的就行；（按照那个匹配条件可能找不到插入的位置，这里也存储下最大值的那个节点，方便在第4个步骤中使用）；
+4. 若循环中没有找到对应的位置，说明该值可能更小或者更大，插入到链表的最大值和最小值中间即可；
+
+**代码：**
+
+```c++
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    Node* next;
+
+    Node() {}
+
+    Node(int _val) {    
+        val = _val;
+        next = NULL;
+    }
+
+    Node(int _val, Node* _next) {
+        val = _val;
+        next = _next;
+    }
+};
+*/
+
+class Solution {
+public:
+    Node* insert(Node* head, int insertVal) {
+        Node* node = new Node(insertVal);
+        if(head == nullptr) {
+            node->next = node;
+            return node;
+        }
+        Node* maxNode = head;
+        Node* curNode = head;
+        do {
+            if(insertVal >= curNode->val && insertVal <= curNode->next->val) { // 其实包含了只有一个节点的情况
+                node->next = curNode->next;
+                curNode->next = node;
+                return head;
+            }
+            if(curNode->val >= maxNode->val) maxNode = curNode;
+            curNode = curNode->next;
+        } while(curNode != head);
+
+        // 如果上面循环每找到位置，就说明它比最大节点还大，插到最大节点后面即可
+        node->next = maxNode->next;
+        maxNode->next = node;
+        return head;
+    }
+};
+```
+
