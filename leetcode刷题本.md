@@ -12379,3 +12379,207 @@ public:
 
 
 ## [剑指 Offer II 033. 变位词组 [medium]](#49. 字母异位词分组 [medium])
+
+
+
+## 剑指 Offer II 034. 外星语言是否排序 [easy]
+
+[剑指 Offer II 034. 外星语言是否排序 - 力扣（LeetCode）](https://leetcode.cn/problems/lwyVBB/)
+
+**思路：**
+
+用map<char, int>构建字典，从词组头开始两两比较两个单词的字典序，若符合题意则接着比较，不符合题意就返回false
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    // 比较s1与s2的字典序，如果s1 < s2（按照题意字典序大的在后），返回true
+    bool cmpWord(string& s1, string& s2) {
+        for(int i = 0; i < min(s1.size(), s2.size()); i++) {
+            if(dict[s1[i]] < dict[s2[i]]) return true;
+            else if(dict[s1[i]] > dict[s2[i]]) return false;
+            else continue;
+        }
+        if(s1.size() <= s2.size()) return true;
+        else return false;
+    }
+    bool isAlienSorted(vector<string>& words, string order) {
+        for(int i = 0; i < order.size(); i++) {
+            dict[order[i]] = i;
+        }
+        for(int i = 0; i < words.size() - 1; i++) {
+            if(cmpWord(words[i], words[i + 1])) continue;
+            else return false;
+        }
+        return true;
+    }
+private:
+    unordered_map<char, int> dict;
+};
+```
+
+
+
+## 剑指 Offer II 035. 最小时间差 [medium]
+
+[剑指 Offer II 035. 最小时间差 - 力扣（LeetCode）](https://leetcode.cn/problems/569nqc/)
+
+**思路：**
+
+首先对数组进行排序，需要针对时间格式的字符串重写排序方法（还有一种思路是将HH:MM转化为分钟，int）。排序后比较相邻两个时间的时间差，注意最后一个时间要和第一个时间比（下一天）。
+
+加上`if(timePoints.size() > 1440) return 0;`会快很多，因为24 * 60 = 1440
+
+**代码：**
+
+```c++
+class Cmp_t{
+public:
+    bool operator()(const string& t1, const string& t2) const {
+        int h1 = stoi(t1.substr(0, 2));
+        int h2 = stoi(t2.substr(0, 2));
+        if(h1 < h2) return true;
+        else if(h1 > h2) return false;
+        else {
+            int m1 = stoi(t1.substr(3, 2));
+            int m2 = stoi(t2.substr(3, 2));
+            if(m1 < m2) return true;
+            else return false;
+        }
+    }
+};
+
+class Solution {
+public:
+    int calGapMin(const string& t1, const string& t2, bool nextDay) {
+        int h1 = stoi(t1.substr(0, 2));
+        int h2 = stoi(t2.substr(0, 2));
+        int m1 = stoi(t1.substr(3, 2));
+        int m2 = stoi(t2.substr(3, 2));
+        if(nextDay) h2 += 24;
+        return (h2 - h1) * 60 + (m2 - m1);
+    }
+
+    int findMinDifference(vector<string>& timePoints) {
+        if(timePoints.size() > 1440) return 0;
+        sort(timePoints.begin(), timePoints.end(), Cmp_t());
+        timePoints.push_back(timePoints[0]);
+        int result = __INT_MAX__;
+        for(int i = 0; i < timePoints.size() - 1; i++) {
+            int gap = calGapMin(timePoints[i], timePoints[i + 1], i == timePoints.size() - 2 ? true : false);
+            if(gap < result) result = gap;
+        }
+        return result;
+    }
+};
+```
+
+
+
+## [剑指 Offer II 036. 后缀表达式 [medium]](#150. 逆波兰表达式求值 [medium])
+
+
+
+## 剑指 Offer II 037. 小行星碰撞 [medium]
+
+**思路：**
+
+用栈的思想去模拟，即：只有当栈顶元素与将要入栈元素异号、且将要入栈元素小于0时，会相撞。相撞，要么一路撞穿，要么撞到某个使自己粉碎。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> asteroidCollision(vector<int>& asteroids) {
+        vector<int> st;
+        for (auto aster : asteroids) {
+            bool alive = true;
+            while (alive && aster < 0 && !st.empty() && st.back() > 0) {
+                alive = st.back() < -aster; // aster 是否存在
+                if (st.back() <= -aster) {  // 栈顶小行星爆炸
+                    st.pop_back();
+                }
+            }
+            if (alive) {
+                st.push_back(aster);
+            }
+        }
+        return st;
+    }
+};
+```
+
+
+
+## [剑指 Offer II 038. 每日温度 [medium]](#739. 每日温度 [medium])
+
+
+
+## [剑指 Offer II 039. 直方图最大矩形面积 [hard]](#84. 柱状图中最大的矩形 [hard])
+
+
+
+## 剑指 Offer II 040. 矩阵中最大的矩形 [hard]
+
+[剑指 Offer II 040. 矩阵中最大的矩形 - 力扣（LeetCode）](https://leetcode.cn/problems/PLYXKQ/)
+
+**思路：**
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230627203900717.png)
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230627203917922.png)
+
+由图可见，每一层可以抽象为一个柱状图，求每层的最大面积就和上一题一样了。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int maximalRectangle(vector<string>& matrix) {
+        int result = 0;
+        if(matrix.size() == 0) return result;
+        vector<int> heights(matrix[0].size(), 0);
+        for(int i = 0; i < matrix.size(); i++) {
+            for(int j = 0; j < matrix[i].size(); j++) {
+                if(matrix[i][j] == '0') heights[j] = 0;
+                else heights[j] ++;
+            }
+            result = max(result, maxRec1D(heights));
+        }
+        return result;
+    }
+
+    int maxRec1D(vector<int>& heights) {
+        stack<int> sta;
+        heights.insert(heights.begin(), 0);
+        heights.push_back(0);
+        sta.push(0);
+        int result = 0;
+        for(int i = 1; i < heights.size(); i++) {
+            if(heights[sta.top()] < heights[i]) {
+                sta.push(i);
+            } else if(heights[sta.top()] == heights[i]) {
+                sta.pop();
+                sta.push(i);
+            } else {
+                while(heights[sta.top()] > heights[i]) {
+                    int h = heights[sta.top()];
+                    sta.pop();
+                    int w = i - sta.top() - 1;
+                    int area = h * w;
+                    result = max(result, area);
+                }
+                sta.push(i);
+            }
+        }
+        heights.pop_back();
+        heights.erase(heights.begin());
+        return result;
+    }
+};
+```
+
