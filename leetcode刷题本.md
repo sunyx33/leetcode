@@ -12583,3 +12583,201 @@ public:
 };
 ```
 
+
+
+## 剑指 Offer II 041. 滑动窗口的平均值 [easy]
+
+[剑指 Offer II 041. 滑动窗口的平均值 - 力扣（LeetCode）](https://leetcode.cn/problems/qIsx9U/)
+
+**思路：**
+
+双向队列，模拟滑动窗口
+
+**代码：**
+
+```c++
+class MovingAverage {
+public:
+    /** Initialize your data structure here. */
+    MovingAverage(int size) {
+        m_size = size;
+        m_sum = 0;
+    }
+    
+    double next(int val) {
+        if(m_que.size() == m_size) {
+            int del = m_que.front();
+            m_que.pop();
+            m_sum -= del;
+        }
+        m_que.push(val);
+        m_sum += val;
+        return static_cast<double>(m_sum) / m_que.size();
+    }
+private:
+    queue<int> m_que;
+    int m_size;
+    int m_sum;
+};
+
+/**
+ * Your MovingAverage object will be instantiated and called as such:
+ * MovingAverage* obj = new MovingAverage(size);
+ * double param_1 = obj->next(val);
+ */
+```
+
+
+
+## 剑指 Offer II 042. 最近请求次数 [easy]
+
+[剑指 Offer II 042. 最近请求次数 - 力扣（LeetCode）](https://leetcode.cn/problems/H8086Q/)
+
+**思路：**
+
+队列模拟滑动窗口
+
+**代码：**
+
+```c++
+class RecentCounter {
+public:
+    RecentCounter() {
+
+    }
+    
+    int ping(int t) {
+        m_que.push(t);
+        while(m_que.front() < t - 3000) m_que.pop();
+        return m_que.size();
+    }
+private:
+    queue<int> m_que;
+};
+```
+
+
+
+## 剑指 Offer II 043. 往完全二叉树添加节点 [medium]
+
+[剑指 Offer II 043. 往完全二叉树添加节点 - 力扣（LeetCode）](https://leetcode.cn/problems/NaqhDT/?envType=study-plan-v2&envId=coding-interviews-special)
+
+**思路：**
+
+层序遍历，给每层中第一个度小于2的结点添加孩子结点。
+
+**代码：**
+
+```c++
+class CBTInserter {
+public:
+    CBTInserter(TreeNode* root) {
+        m_root = root;
+        TreeNode* cur = root;
+        m_que.push(root);
+        while(m_que.front()->left || m_que.front()->right) {
+            if(m_que.front()->left && m_que.front()->right) {
+                m_que.push(m_que.front()->left);
+                m_que.push(m_que.front()->right);
+                m_que.pop();
+            } else {
+                m_que.push(m_que.front()->left);
+                break;
+            }
+        }
+    }
+    
+    int insert(int v) {
+        TreeNode* node = new TreeNode(v);
+        int ret = m_que.front()->val;
+        if(!m_que.front()->left) m_que.front()->left = node;
+        else {
+            m_que.front()->right = node;
+            m_que.pop();
+        }
+        m_que.push(node);
+        return ret;
+    }
+    
+    TreeNode* get_root() {
+        return m_root;
+    }
+private:
+    TreeNode* m_root;
+    queue<TreeNode*> m_que;
+};
+```
+
+
+
+## 剑指 Offer II 044. 二叉树每层的最大值 [medium]
+
+[剑指 Offer II 044. 二叉树每层的最大值 - 力扣（LeetCode）](https://leetcode.cn/problems/hPov7L/)
+
+**思路：**
+
+层序遍历，找每层最大值
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> largestValues(TreeNode* root) {
+        vector<int> result;
+        int layer = 0;
+        queue<TreeNode*> que;
+        if(root) que.push(root);
+        while(!que.empty()) {
+            int max = INT_MIN;
+            int size = que.size();
+            while(size --) {
+                if(que.front()->val > max) max = que.front()->val;
+                if(que.front()->left) que.push(que.front()->left);
+                if(que.front()->right) que.push(que.front()->right);
+                que.pop();
+            }
+            result.push_back(max);
+        }
+        return result;
+    }
+};
+```
+
+
+
+## [剑指 Offer II 045. 二叉树最底层最左边的值 [medium]](#513. 找树左下角的值 [medium])
+
+
+
+## 剑指 Offer II 046. 二叉树的右侧视图 [medium]
+
+[剑指 Offer II 046. 二叉树的右侧视图 - 力扣（LeetCode）](https://leetcode.cn/problems/WNC0Lk/)
+
+**思路：**
+
+层序遍历，记录每层最右边的结点
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        queue<TreeNode*> que;
+        vector<int> result;
+        if(root) que.push(root);
+        while(!que.empty()) {
+            int size = que.size();
+            for(int i = 0; i < size; i++) {
+                if(i == size - 1) result.push_back(que.front()->val);
+                if(que.front()->left) que.push(que.front()->left);
+                if(que.front()->right) que.push(que.front()->right);
+                que.pop();               
+            }
+        }
+        return result;
+    }
+};
+```
+
