@@ -3684,6 +3684,22 @@ public:
 };
 ```
 
+```c++
+// 其实这个更好理解
+class Solution {
+public:
+    int sum = 0;
+    TreeNode* convertBST(TreeNode* root) {
+        if(!root) return nullptr;
+        convertBST(root->right);
+        sum += root->val;
+        root->val = sum;
+        convertBST(root->left);
+        return root;
+    }
+};
+```
+
 
 
 # 回溯算法 
@@ -12780,4 +12796,232 @@ public:
     }
 };
 ```
+
+
+
+## 剑指 Offer II 047. 二叉树剪枝 [medium]
+
+[剑指 Offer II 047. 二叉树剪枝 - 力扣（LeetCode）](https://leetcode.cn/problems/pOCWxh/)
+
+**思路：**
+
+后序遍历，如果遍历到当前结点为空，则返回nullptr，若左右子结点都返回nullptr并且本结点值为0，则需要净化，返回nullptr
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    TreeNode* pruneTree(TreeNode* root) {
+        if(!root) return root;
+        root->left = pruneTree(root->left);        
+        root->right = pruneTree(root->right);
+        if(!root->left && !root->right && root->val == 0) return nullptr;
+        return root;
+    }
+};
+```
+
+
+
+## [剑指 Offer II 048. 序列化与反序列化二叉树 [hard]](#剑指 Offer 37. 序列化二叉树 [hard])
+
+
+
+## 剑指 Offer II 049. 从根节点到叶节点的路径数字之和 [medium]
+
+[剑指 Offer II 049. 从根节点到叶节点的路径数字之和 - 力扣（LeetCode）](https://leetcode.cn/problems/3Etpl5/)
+
+**思路：**
+
+先序遍历，找路径（用string记录），求和
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    void backtrcking(TreeNode* root, string& path, int& result) {
+        path += to_string(root->val);
+        if(!root->left && !root->right) {
+            result += stoi(path);
+        } else {
+            if(root->left) backtrcking(root->left, path, result);
+            if(root->right) backtrcking(root->right, path, result);
+        }
+        path.erase(path.size() - 1);
+    }
+
+    int sumNumbers(TreeNode* root) {
+        int result = 0;
+        string path = "";
+        backtrcking(root, path, result);
+        return result;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 050. 向下的路径节点之和 [medium]
+
+[剑指 Offer II 050. 向下的路径节点之和 - 力扣（LeetCode）](https://leetcode.cn/problems/6eUYwP/)
+
+**思路：**
+
+前缀和+回溯
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    unordered_map<long long, int> prefix;
+
+    int dfs(TreeNode *root, long long curr, int targetSum) {
+        if (!root) {
+            return 0;
+        }
+
+        int ret = 0;
+        curr += root->val;
+        if (prefix.count(curr - targetSum)) {
+            ret = prefix[curr - targetSum];
+        }
+
+        prefix[curr]++;
+        ret += dfs(root->left, curr, targetSum);
+        ret += dfs(root->right, curr, targetSum);
+        prefix[curr]--;
+
+        return ret;
+    }
+
+    int pathSum(TreeNode* root, int targetSum) {
+        prefix[0] = 1;
+        return dfs(root, 0, targetSum);
+    }
+};
+```
+
+
+
+## 剑指 Offer II 051. 节点之和最大的路径 [hard]
+
+[剑指 Offer II 051. 节点之和最大的路径 - 力扣（LeetCode）](https://leetcode.cn/problems/jC7MId/)
+
+**思路：**
+
+计算每个结点对总和的贡献值：
+
+```c++
+max(max(left, right) + root->val, 0)
+```
+
+倘若这个结点要接入为路径的一部分，则取它最大的孩子与它自己的和，若结果小于0，则舍弃（置零）。
+
+记录**每个结点参与路径**时可能造成最大和，与最终结果作比较：
+
+```c++
+// 包含了 [根, 根 + 左, 根 + 右, 根 + 左 + 右] 四种情况，
+result = max(result, left + right + root->val);
+```
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int maxPathSum(TreeNode* root) {
+        int result = INT_MIN;
+        getMax(root, result);
+        return result;
+    }
+    int getMax(TreeNode* root, int& result) {
+        if(!root) return 0;
+        int left = max(getMax(root->left, result), 0);
+        int right = max(getMax(root->right, result), 0);
+        result = max(result, left + right + root->val);
+        return max(left, right) + root->val;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 052. 展平二叉搜索树 [easy]
+
+[剑指 Offer II 052. 展平二叉搜索树 - 力扣（LeetCode）](https://leetcode.cn/problems/NYBBNL/)
+
+**思路：**
+
+中序遍历，再重构一个二叉树。
+
+在递归中改指针的方法比较难想，并且空间复杂度依旧是O(n)，因为递归栈。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    void inorder(TreeNode *node, vector<int> &res) {
+        if (node == nullptr) {
+            return;
+        }
+        inorder(node->left, res);
+        res.push_back(node->val);
+        inorder(node->right, res);
+    }
+
+    TreeNode *increasingBST(TreeNode *root) {
+        vector<int> res;
+        inorder(root, res);
+
+        TreeNode *dummyNode = new TreeNode(-1);
+        TreeNode *currNode = dummyNode;
+        for (int value : res) {
+            currNode->right = new TreeNode(value);
+            currNode = currNode->right;
+        }
+        return dummyNode->right;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 053. 二叉搜索树中的中序后继 [medium]
+
+[剑指 Offer II 053. 二叉搜索树中的中序后继 - 力扣（LeetCode）](https://leetcode.cn/problems/P5rCT8/)
+
+**思路：**
+
+中序遍历，遇到第一个比p大的结点，就记录该结点，并跳过接下来的所有遍历。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    TreeNode* res;
+    void inorder(TreeNode* root, TreeNode* p) {
+        if(!root || res) return;
+        inorderSuccessor(root->left, p);
+        cout << root->val << endl;
+        if(!res && root->val > p->val) {
+            res = root;
+            return;
+        }
+        inorderSuccessor(root->right, p);
+    }
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        inorder(root, p);
+        return res;
+    }
+};
+```
+
+
+
+## [剑指 Offer II 054. 所有大于等于节点的值之和 [medium]](#538. 把二叉搜索树转换为累加树 [medium])
 
