@@ -13025,3 +13025,163 @@ public:
 
 ## [剑指 Offer II 054. 所有大于等于节点的值之和 [medium]](#538. 把二叉搜索树转换为累加树 [medium])
 
+
+
+## 剑指 Offer II 055. 二叉搜索树迭代器 [medium]
+
+[剑指 Offer II 055. 二叉搜索树迭代器 - 力扣（LeetCode）](https://leetcode.cn/problems/kTOapQ/)
+
+**思路：**
+
+一种是直接中序遍历成数组或是链表，然后维护一个指针去遍历这个数组或链表。这需要额外空间。
+
+另一种是直接展平二叉树成一个链表，进行遍历。
+
+**代码：**
+
+```c++
+class BSTIterator {
+public:
+    BSTIterator(TreeNode* root) {
+        dummy = new TreeNode(-1);
+        pre = dummy;
+        cur = dummy;
+        flatten(root);
+    }
+
+    void flatten(TreeNode* root) {
+        if(!root) return;
+        flatten(root->left);
+        pre->right = root;
+        root->left = nullptr;
+        pre = root;
+        flatten(root->right); 
+    }
+    
+    int next() {
+        cur = cur->right;
+        return cur->val;
+    }
+    
+    bool hasNext() {
+        return cur->right != nullptr;
+    }
+private:
+    TreeNode* dummy;
+    TreeNode* pre;
+    TreeNode* cur;
+};
+```
+
+
+
+## 剑指 Offer II 056. 二叉搜索树中两个节点之和 [easy]
+
+[剑指 Offer II 056. 二叉搜索树中两个节点之和 - 力扣（LeetCode）](https://leetcode.cn/problems/opLdQZ/)
+
+**思路：**
+
+经典两数和，只不过从遍历数组变成了dfs
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool findTarget(TreeNode* root, int k) {
+        if(!root) return false;
+        if(m_set.find(k - root->val) != m_set.end()) return true;
+        else {
+            m_set.emplace(root->val);
+            return findTarget(root->left, k) || findTarget(root->right, k);
+        }
+        return false;
+    }
+private:
+    unordered_set<int> m_set;
+};
+```
+
+
+
+## 剑指 Offer II 057. 值和下标之差都在给定的范围内 [medium]
+
+[剑指 Offer II 057. 值和下标之差都在给定的范围内 - 力扣（LeetCode）](https://leetcode.cn/problems/7WqeDu/)
+
+**思路：**
+
+[值和下标之差都在给定的范围内 - 值和下标之差都在给定的范围内 - 力扣（LeetCode）](https://leetcode.cn/problems/7WqeDu/solution/zhi-he-xia-biao-zhi-chai-du-zai-gei-ding-94ei/)
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    bool containsNearbyAlmostDuplicate(vector<int>& nums, int k, int t) {
+        set<int> window;
+        for(int i = 0; i < nums.size(); i++) {
+            auto iter  = window.lower_bound(max(nums[i], INT_MIN + t) - t);
+            if(iter != window.end() && *iter <= min(nums[i], INT_MAX - t) + t) return true;
+            window.emplace(nums[i]);
+            if(i >= k) {
+                window.erase(nums[i - k]);
+            }
+        }
+        return false;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 058. 日程表 [medium]
+
+[剑指 Offer II 058. 日程表 - 力扣（LeetCode）](https://leetcode.cn/problems/fi9suh/)
+
+**思路：**
+
+其实本质是一个搜索二叉树插入，只不过需要改变一下结点（start，end）还有结点比较大小的方式（见代码）
+
+**代码：**
+
+```c++
+class MyNode{
+public:
+    int start;
+    int end;
+    MyNode* left;
+    MyNode* right;
+    MyNode(int start, int end) : start(start), end(end), left(nullptr), right(nullptr){}
+    bool operator>(const MyNode& node) {
+        return this->start >= node.end;
+    }
+    bool operator<(const MyNode& node) {
+        return node.start >= this->end;
+    }
+};
+
+
+class MyCalendar {
+public:
+    MyCalendar() {
+        root = nullptr;
+    }
+    
+    bool book(int start, int end) {
+        MyNode* node = new MyNode(start, end);
+        return insert(root, node);
+    }
+
+    bool insert(MyNode*& root, MyNode* node) {
+        if(!root) {
+            root = node;
+            return true;
+        } else if(*node > *root) return insert(root->right, node);
+        else if(*node < *root) return insert(root->left, node);
+        else return false;
+    };
+
+    MyNode* root;
+};
+```
+
