@@ -5894,9 +5894,9 @@ public:
 
 2. 确定递推公式
 
-   有两个方向推出来dp[i][j]，
+   有两个方向推出来dp\[i][j]，
 
-   - **不放物品i**：由dp\[i - 1][j]推出，即背包容量为j，里面不放物品i的最大价值，此时dp[i][j]就是dp\[i - 1][j]。(其实就是当物品i的重量大于背包j的重量时，物品i无法放进背包中，所以被背包内的价值依然和前面相同。)
+   - **不放物品i**：由dp\[i - 1][j]推出，即背包容量为j，里面不放物品i的最大价值，此时dp\[i][j]就是dp\[i - 1][j]。(其实就是当物品i的重量大于背包j的重量时，物品i无法放进背包中，所以被背包内的价值依然和前面相同。)
    - **放物品i**：由dp\[i - 1][j - weight[i]]推出，dp\[i - 1][j - weight[i]] 为背包容量为j - weight[i]的时候不放物品i的最大价值，那么dp\[i - 1][j - weight[i]] + value[i] ，就是背包放物品i得到的最大价值
 
    故：$dp[i][j] = max(dp[i - 1][j], dp[i - 1][j-weight[i]] + value[i])$
@@ -6480,11 +6480,11 @@ public:
 
 ## 多重背包简介
 
-有N种物品和一个容量为V 的背包。第i种物品最多有Mi件可用，每件耗费的空间是Ci ，价值是Wi 。求解将哪些物品装入背包可使这些物品的耗费的空间 总和不超过背包容量，且价值总和最大。
+有N种物品和一个容量为V 的背包。第i种物品有Mi件，每件耗费的空间是Ci ，价值是Wi 。求解将哪些物品装入背包可使这些物品的耗费的空间总和不超过背包容量，且价值总和最大。
 
 多重背包和01背包是非常像的， 为什么和01背包像呢？
 
-每件物品最多有Mi件可用，把Mi件摊开，其实就是一个01背包问题了。
+每件物品有Mi件，把Mi件摊开，其实就是一个01背包问题了。
 
 例如：
 
@@ -13182,6 +13182,88 @@ public:
     };
 
     MyNode* root;
+};
+```
+
+
+
+## [剑指 Offer II 088. 爬楼梯的最少成本 [easy]](#746. 使用最小花费爬楼梯 [easy])
+
+
+
+## [剑指 Offer II 089. 房屋偷盗 [medium]](#198. 打家劫舍 [medium])
+
+
+
+## [剑指 Offer II 090. 环形房屋偷盗 [medium]](#213. 打家劫舍II [medium])
+
+
+
+## 剑指 Offer II 091. 粉刷房子 [medium]
+
+[剑指 Offer II 091. 粉刷房子 - 力扣（LeetCode）⁤](https://leetcode.cn/problems/JEj789/)
+
+**思路：**
+
+dp\[i][j]：第i栋房子刷j油漆的最小花费。
+
+```
+dp[i][j] = min(dp[i - 1][k])  // (k != j)
+```
+
+这里没有创建dp数组，直接在costs上修改，省地方
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int minCost(vector<vector<int>>& costs) {
+        for(int i = 1; i < costs.size(); i++) {
+            costs[i][0] += min(costs[i - 1][1], costs[i - 1][2]);
+            costs[i][1] += min(costs[i - 1][0], costs[i - 1][2]);
+            costs[i][2] += min(costs[i - 1][0], costs[i - 1][1]);
+        }
+        return min(costs.back()[0], min(costs.back()[1], costs.back()[2]));
+    }
+};
+```
+
+
+
+## 剑指 Offer II 092. 翻转字符 [medium]
+
+[剑指 Offer II 092. 翻转字符 - 力扣（LeetCode）⁤](https://leetcode.cn/problems/cyJERH/)
+
+**思路：**
+
+dp\[i][0]：考虑0~i位，最后一位为0时，最少翻转几个
+
+dp\[i][1]：考虑0~i位，最后一位为1时，最少翻转几个
+
+```
+dp[i][0] = dp[i - 1][0] + (s[i] != 0); // 最后一位为0时，前一位必须是0
+dp[i][1] = min(dp[i - 1][0], dp[i - 1][1]) + (s[i] != 1) // 最后一位为1时，前一位可0可1
+```
+
+使用滚动数组节省空间，但要注意先对dp[1]赋值，因为dp[1]会用到dp[0]
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int minFlipsMonoIncr(string s) {
+        vector<int> dp(2, 0);
+        dp[0] = s[0] != '0';
+        dp[1] = s[0] != '1';
+        for(int i = 1; i < s.size(); i++) {
+            dp[1] = min(dp[0], dp[1]) + (s[i] != '1'); // 不要忘记加括号
+            dp[0] = dp[0] + (s[i] != '0');
+            
+        }
+        return min(dp[0], dp[1]);
+    }
 };
 ```
 
