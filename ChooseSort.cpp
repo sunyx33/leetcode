@@ -1,28 +1,29 @@
 #include <stdio.h>
 #include <iostream>
+#include <vector>
 using namespace std;
 
-void chooseSort(int nums[], int len) {
-    int tmp = 0;
+void chooseSort(vector<int>& nums) {
     int minNum = INT_MAX;
-    int minNumIdx;
-    for (int i = 0; i < len - 1; i++) {
+    int minIdx = 0;
+    for(int i = 0; i < nums.size(); i++) {
         minNum = INT_MAX;
-        for (int j = i; j < len ; j++) { 
-            if (nums[j] < minNum) {
-                minNumIdx = j;
+        for(int j = i; j < nums.size(); j++) {
+            if(nums[j] < minNum) {
                 minNum = nums[j];
+                minIdx = j;
             }
         }
-        tmp = nums[i];
-        nums[i] = nums[minNumIdx];
-        nums[minNumIdx] = tmp;
+        swap(nums[i], nums[minIdx]);
     }
 }
 
 int main() {
-    int nums[5] = {0, 5, 1, 4, 3};
-    int len = sizeof(nums) / sizeof(nums[0]);
-    chooseSort(nums, len);
+    cout << "chooseSort" << endl;
+    vector<int> nums = {1,7,4,8,2,3,9,5,6};
+    chooseSort(nums);
+    for(int n : nums) {
+        cout << n << " ";
+    }
     return 0;
 }

@@ -2127,7 +2127,7 @@ class Solution {
         public:
             // 运算符重载
             // 参数1是比较者，参数2是被比较者，返回true说明参数1优先级高，也就是说，频率越大优先级越高
-            // 乍一看这个逻辑反了，其实原因是优先级队列从队尾（优先级最小的）pop，所以和堆这个刚好反着来
+        	// less是大顶堆是因为：插入节点从最底层开始上浮，如果父节点 < 插入结点(less)，则交换，所以就是大顶堆
             bool operator()(const pair<int, int>& lhs, const pair<int, int>& rhs) {
                 return lhs.second > rhs.second;
             }
@@ -13187,6 +13187,268 @@ public:
 
 
 
+## 剑指 Offer II 059. 数据流的第 K 大数值 [easy]
+
+[剑指 Offer II 059. 数据流的第 K 大数值 - 力扣（LeetCode）](https://leetcode.cn/problems/jBjn9C/)
+
+**思路：**
+
+大小为k的小根堆过一遍数组即可。
+
+小根堆在做pop操作时，会pop掉小的（堆顶），所以最终留下来的k个数就是前k大的数，其中堆顶就是第k大的数。
+
+**代码：**
+
+```c++
+class KthLargest {
+public:
+    KthLargest(int k, vector<int>& nums) {
+        m_k = k;
+        for(int n : nums) {
+            m_heap.push(n);
+            if(m_heap.size() > m_k) m_heap.pop();
+        }
+    }
+    
+    int add(int val) {
+        m_heap.push(val);
+        if(m_heap.size() > m_k) m_heap.pop();
+        return m_heap.top();
+    }
+
+private:
+    priority_queue<int, vector<int>, greater<int>> m_heap;
+    int m_k;
+};
+
+```
+
+
+
+## [剑指 Offer II 060. 前 K 个高频元素 [medium]](#347. 前-k-个高频元素 [medium])
+
+
+
+
+
+## 剑指 Offer II 061. 查找和最小的 K 对数字 [medium]
+
+[LCR 061. 查找和最小的 K 对数字 - 力扣（LeetCode）](https://leetcode.cn/problems/qn8gGX/)
+
+**思路：**
+
+首先，最小的只能是[0, 0]，那么次小的是[0, 1]还是[1, 0]呢？不知道，交给小根堆，pop出谁就是谁小。
+
+所以，首先给堆中push：[0, 0]，[1, 0] ... [n, 0]
+
+然后pop出的一定是最小的[x, y]，接下来push一个[x, y + 1]，这样一来保证[x, y + 1]之前没被push过（初始y都是0），即每次push都将idx2 + 1。
+
+popk个，满足题意
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> kSmallestPairs(vector<int>& nums1, vector<int>& nums2, int k) {
+        vector<vector<int>> ans;
+        auto cmp = [&nums1, &nums2](vector<int>& p1, vector<int>& p2) {
+            return nums1[p1[0]] + nums2[p1[1]] > nums1[p2[0]] + nums2[p2[1]];
+        };
+        priority_queue<vector<int>, vector<vector<int>>, decltype(cmp)> heap(cmp);
+        for(int i = 0; i < min(k, static_cast<int>(nums1.size())); i++) { // 初始化时push k 个就够了
+            heap.push(vector<int> {i, 0});
+        }
+        while(k -- && !heap.empty()) {
+            vector<int> vec = heap.top();
+            ans.push_back(vector<int> {nums1[vec[0]], nums2[vec[1]]});
+            heap.pop();
+            if(vec[1] + 1 < nums2.size()){
+                heap.push(vector<int> {vec[0], vec[1] + 1});
+            }
+        }
+        return ans;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 062. 实现 Trie (前缀树) [medium]
+
+[LCR 062. 实现 Trie (前缀树) - 力扣（LeetCode）](https://leetcode.cn/problems/QC3q1f/)
+
+**思路：**
+
+前缀树，常用于查询单词的前缀或者是否出现过：
+
+![](https://sunnyx-1306524139.cos.ap-chengdu.myqcloud.com/img/image-20230805151746810.png)
+
+其结点长这样：
+
+```c++
+struct Node {
+    bool isWord; // 该字符是否是某个单词的结尾
+    vector<Node*> children; // 26叉树
+    Node() : isWord(false), children(26, nullptr) {};
+    ~Node() { // 注意析构
+        for(auto& child : children) {
+            delete child;
+        }
+    }
+};
+```
+
+**代码：**
+
+```c++
+class Trie {
+public:
+    struct Node {
+        bool isWord;
+        vector<Node*> children;
+        Node() : isWord(false), children(26, nullptr) {};
+        ~Node() {
+            for(auto& child : children) {
+                delete child;
+            }
+        }
+    };
+    
+    Trie() {
+        root = new Node();
+    }
+    
+    void insert(string word) {
+        Node* node = root;
+        for(char c : word) {
+            if(!node->children[c - 'a']) node->children[c - 'a'] = new Node();
+            node = node->children[c - 'a'];
+        }
+        node->isWord = true;
+    }
+    
+    bool search(string word) {
+        Node* node = root;
+        for(char c : word) {
+            if(!node->children[c - 'a']) return false;
+            node = node->children[c - 'a'];
+        }
+        return node->isWord;
+    }
+    
+    bool startsWith(string prefix) {
+        Node* node = root;
+        for(char c : prefix) {
+            if(!node->children[c - 'a']) return false;
+            node = node->children[c - 'a'];
+        }
+        return true;
+    }
+
+private:
+    Node* root;
+};
+```
+
+
+
+## 剑指 Offer II 068. 搜索插入位置 [easy]
+
+[LCR 068. 搜索插入位置 - 力扣（LeetCode）](https://leetcode.cn/problems/N6YdxV/submissions/)
+
+**思路：**
+
+经典二分，一定要坚持一个固定的区间标准：左闭右开
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int searchInsert(vector<int>& nums, int target) {
+        // 二分查找区间规范很重要：左闭右开
+        int left = 0;
+        int right = nums.size();
+        while(right > left) {
+            int mid = (left + right) / 2;
+            if(nums[mid] > target) right = mid;
+            else if(nums[mid] < target) left = mid + 1;
+            else return mid;
+        }
+        return left;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 069. 山脉数组的峰顶索引 [easy]
+
+[LCR 069. 山脉数组的峰顶索引 - 力扣（LeetCode）](https://leetcode.cn/problems/B1IidL/)
+
+**思路：**
+
+二分法，如何判断mid是在峰左还是峰右？比较其左右相邻的数即可。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int peakIndexInMountainArray(vector<int>& arr) {
+        int left = 0;
+        int right = arr.size();
+        while(right > left) {
+            int mid = (left + right) / 2;
+            if(arr[mid - 1] < arr[mid] && arr[mid + 1] < arr[mid]) return mid;
+            else if(arr[mid - 1] > arr[mid]) right = mid;
+            else left = mid + 1;
+        }
+        return -1;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 070. 有序数组中的单一元素 [medium]
+
+[LCR 070. 有序数组中的单一元素 - 力扣（LeetCode）](https://leetcode.cn/problems/skFtm2/)
+
+**思路：**
+
+正常来说：下标是偶数的应该与下一个数字相同；下标奇数的应该与上一个数字相同。
+
+引入那个单身狗会破坏这个规则，所以：
+
+- 如果mid是偶数且与下一个数不同：目标在mid之前（包括mid）；否则在mid之后
+- 如果mid是奇数且与上一个数不同：目标在mid之前（不包括mid，目标索引不可能是奇数）；否则在mid之后
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int singleNonDuplicate(vector<int>& nums) {
+        // 如果mid是偶数且与下一个数不同：目标在mid之前（包括mid）；否则在mid之后
+        // 如果mid是奇数且与上一个数不同：目标在mid之前（不包括mid，目标索引不可能是奇数）；否则在mid之后
+        int left = 0;
+        int right = nums.size() - 1;
+        while(right > left) {
+            int mid = (left + right) / 2;
+            if(mid % 2 == 0 && nums[mid] != nums[mid + 1]) right = mid;
+            else if(mid % 2 == 0 && nums[mid] == nums[mid + 1]) left = mid + 1;
+            else if(mid % 2 == 1 && nums[mid] != nums[mid - 1]) right = mid - 1;
+            else left = mid + 1;
+        }
+        return nums[left];
+    }
+};
+```
+
+
+
 ## [剑指 Offer II 088. 爬楼梯的最少成本 [easy]](#746. 使用最小花费爬楼梯 [easy])
 
 
@@ -13266,4 +13528,8 @@ public:
     }
 };
 ```
+
+
+
+## [剑指 Offer II 095. 最长公共子序列 [medium]](#1143.最长公共子序列 [medium])
 
