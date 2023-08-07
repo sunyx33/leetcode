@@ -13449,6 +13449,109 @@ public:
 
 
 
+## 剑指 Offer II 071. 按权重随机选择 [medium]
+
+[LCR 071. 按权重随机选择 - 力扣（LeetCode）](https://leetcode.cn/problems/cuyjEf/)
+
+**思路：**
+
+把权重数组转变为累加和的形式：[1,2,3,4] -> [1,3,6,10]
+
+然后随机得到一个[0,10)范围内的随机数，假如是4，找到数组中第一个比他大的数6，则其对应的下标2就是此次要返回的idx
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> vec;
+    Solution(vector<int>& w) {
+        partial_sum(w.begin(), w.end(), back_inserter(vec));
+    }
+    
+    int pickIndex() {
+        return upper_bound(vec.begin(), vec.end(), rand() % vec.back()) - vec.begin();
+    }
+};
+```
+
+
+
+## 剑指 Offer II 072. x 的平方根 [easy]
+
+[LCR 072. x 的平方根 - 力扣（LeetCode）](https://leetcode.cn/problems/jJ0w9p/?envType=study-plan-v2&envId=coding-interviews-special)
+
+**思路：**
+
+二分法，找到一个$n^2 = x$或者一个$(n+1)^2 > x > n^2$的数字
+
+若$n^2 >x$则右边界移到n；若$(n + 1)^2 < x$则左边界移到n
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int mySqrt(int x) {
+        long left = 0;
+        long right = x;
+        while(right > left) {
+            long mid = (left + right) / 2;
+            if(mid * mid == x || ( (mid * mid) < x && (mid + 1) * (mid + 1) > x) ) return mid;
+            else if((mid * mid) > x) right = mid - 1;
+            else left = mid + 1;
+        }
+        return left;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 073. 爱吃香蕉的狒狒 [medium]
+
+[LCR 073. 爱吃香蕉的狒狒 - 力扣（LeetCode）](https://leetcode.cn/problems/nZZqjQ/)
+
+**思路：**
+
+二分法，范围是1~数组中最大数（超过最大数没有意义），二分法去找到尽可能用时最多的speed，每找一个speed（mid）就算一下用时，用时>=h则可能可以继续慢（right = mid），否则就要快一些（left = mid + 1）
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int minEatingSpeed(vector<int>& piles, int h) {
+        int left = 1;
+        int right = 0;
+        for(int n : piles) {
+            if(n > right) right = n;
+        }
+        while(right > left) {
+            int mid = (left + right) / 2;
+            if(check(piles, mid, h)) right = mid;
+            else left = mid + 1;
+        }
+        return left;
+    }
+
+    bool check(vector<int>& piles, int k, int h) {
+        int time = 0;
+        for(int n : piles) {
+            time += ceil(n * 1.0 / k);
+        }
+        return time <= h;
+    }
+
+};
+```
+
+
+
+## [剑指 Offer II 074. 合并区间 [medium]](#56. 合并区间 [medium])
+
+
+
 ## [剑指 Offer II 088. 爬楼梯的最少成本 [easy]](#746. 使用最小花费爬楼梯 [easy])
 
 
