@@ -13514,7 +13514,7 @@ public:
 
 **思路：**
 
-二分法，范围是1~数组中最大数（超过最大数没有意义），二分法去找到尽可能用时最多的speed，每找一个speed（mid）就算一下用时，用时>=h则可能可以继续慢（right = mid），否则就要快一些（left = mid + 1）
+二分法，范围是1~数组中最大数（超过最大数没有意义），二分法去找到尽可最慢的speed，每找一个speed（mid）就算一下用时，用时>=h则可能可以继续慢（right = mid），否则就要快一些（left = mid + 1）
 
 **代码：**
 
@@ -13542,13 +13542,142 @@ public:
         }
         return time <= h;
     }
-
 };
 ```
 
 
 
 ## [剑指 Offer II 074. 合并区间 [medium]](#56. 合并区间 [medium])
+
+
+
+## 剑指 Offer II 075. 数组的相对排序 [easy]
+
+[LCR 075. 数组的相对排序 - 力扣（LeetCode）](https://leetcode.cn/problems/0H97ZC/)
+
+**思路：**
+
+重写排序规则：若a与b都在arr2出现过，则下标小的那个小；若只有一个出现过，则出现的那个小；若都没出现过，则数值小的那个小。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    vector<int> relativeSortArray(vector<int>& arr1, vector<int>& arr2) {
+        unordered_map<int, int> arr2Map;
+        for(int i = 0; i < arr2.size(); i++) arr2Map[arr2[i]] = i;
+        sort(arr1.begin(), arr1.end(), [&](int x, int y){
+            if(arr2Map.count(x)) return arr2Map.count(y) ? arr2Map[x] < arr2Map[y] : true;
+            else return arr2Map.count(y) ? false : x < y;
+        });
+        return arr1;
+    }
+};
+```
+
+
+
+## 剑指 Offer II 076. 数组中的第 K 个最大元素 [medium]
+
+[LCR 076. 数组中的第 K 个最大元素 - 力扣（LeetCode）](https://leetcode.cn/problems/xx4gT2/)
+
+**思路：**
+
+1. 堆排序，大小为k的小顶堆，堆顶即是。但是时间复杂度o(nlogn)
+2. 快排，众所周知，快排每层递归可以确定一个数的正确位置——分割点，那我只要再某次递归中确定了倒数第k个位置上的数，后面的工作就不用做了，直接返回即可。
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    int partition(vector<int>& nums, int l, int r) {
+        int location = l;
+        int pivot = r;
+        for(int i = l; i < r; i++) {
+            if(nums[i] < nums[pivot]) swap(nums[i], nums[location++]);
+        }
+        swap(nums[location], nums[pivot]);
+        return location;
+    }
+	
+    // 每次随机选择而不是总是选择最右侧的数作为基准数，这样一来在本题用例上速度显著提升
+    int randomPartition(vector<int>& nums, int l, int r) { 
+        int i = rand() % (r - l + 1) + l;
+        swap(nums[i], nums[r]);
+        return partition(nums, l, r);
+    }
+
+    int quickSort(vector<int>& nums, int l, int r, int idx) {
+        if(r < l) return 0;
+        int pivot = randomPartition(nums, l, r);
+        if(pivot == idx) return nums[pivot];
+        else return pivot < idx ? quickSort(nums, pivot + 1, r, idx) : quickSort(nums, l, pivot - 1, idx);
+    }
+
+    int findKthLargest(vector<int>& nums, int k) {
+        return quickSort(nums, 0, nums.size() - 1, nums.size() - k);
+    }
+};
+```
+
+
+
+## 剑指 Offer II 077. 排序链表 [medium]
+
+[LCR 077. 排序链表 - 力扣（LeetCode）](https://leetcode.cn/problems/7WHec2/description/?envType=study-plan-v2&envId=coding-interviews-special)
+
+**思路：**
+
+链表版归并排序（要求时间复杂度O(nlogn)）
+
+**代码：**
+
+```c++
+class Solution {
+public:
+    ListNode* sortList(ListNode* head) {
+        return sortList(head, nullptr);
+    }
+
+    ListNode* sortList(ListNode* head, ListNode* tail) {
+        if(!head) return head;
+        // 仅有一个节点递归结束
+        if(head->next == tail) {
+            head->next = nullptr;
+            return head;
+        }
+        // 快慢指针找中点
+        ListNode* slow = head;
+        ListNode* fast = head;
+        while(fast != tail) {
+            slow = slow->next;
+            fast = fast->next;
+            if(fast != tail) fast = fast->next;
+        }
+        return merge(sortList(head, slow), sortList(slow, tail));
+    }
+
+    ListNode* merge(ListNode* head1, ListNode* head2) {
+        ListNode* dummyHead = new ListNode(0);
+        ListNode* temp = dummyHead, *temp1 = head1, *temp2 = head2;
+        while(temp1 && temp2) {
+            if(temp1->val < temp2->val) {
+                temp->next = temp1;
+                temp1 = temp1->next;
+            } else {
+                temp->next = temp2;
+                temp2 = temp2->next;
+            }
+            temp = temp->next;
+        }
+        if(temp1) temp->next = temp1;
+        else if(temp2) temp->next = temp2;
+        return dummyHead->next;
+    }
+};
+```
 
 
 
